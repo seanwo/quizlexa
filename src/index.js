@@ -11,10 +11,21 @@ exports.handler = function (event, context, callback) {
     alexa.execute();
 };
 
+function parseToken(access_token){
+  var token = {};
+  token.user_id = access_token.split('|')[0];
+  token.access_token = access_token.substring(access_token.indexOf('|')+1);
+  return token;
+}
+
 var entryPointHandlers = {
     'LaunchRequest': function () {
         var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
+        var accessToken = this.event.session.user.accessToken;
         this.handler.state = states.MAINMENU;
+        if(!accessToken){
+            this.emitWithState('LinkAccountIntent');
+        }
         this.emitWithState('PromptMainMenu', speechOutput);
     }
 }
@@ -25,12 +36,6 @@ var states = {
 
 var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'PromptMainMenu': function (prefix) {
-        var accessToken = this.event.session.user.accessToken;
-        console.log('token: ' + accessToken);
-        if (!accessToken) {
-            var speechOutput = this.t("LINK_ACCOUNT");
-            this.emit(':tellWithLinkAccountCard', speechOutput);
-        }
         var speechOutput = (prefix || "") + this.t("ASK_ME") + this.t("HOW_CAN_I_HELP");
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
@@ -41,7 +46,9 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             var speechOutput = this.t("LINK_ACCOUNT");
             this.emit(':tellWithLinkAccountCard', speechOutput);
         }
-        var speechOutput = this.t("LINKED", accessToken);
+        var token = parseToken(accessToken);
+        console.log('user_id: '+token.user_id+' access_token: '+token.access_token);
+        var speechOutput = this.t("LINKED", token.user_id, token.access_token);
         this.emit(':tell', speechOutput);
     },
     'AMAZON.HelpIntent': function () {
@@ -75,7 +82,7 @@ var languageStrings = {
             "STOP_MESSAGE": "Goodbye! ",
             "NO_UNDERSTAND": "Sorry, I don't quite understand what you mean. ",
             "LINK_ACCOUNT": "Your Quizlet account is not linked.  Please use the Alexa app to link the account.",
-            "LINKED": "Your account is linked.  Access Token <say-as interpret-as=\"characters\">%s</say-as>. "
+            "LINKED": "Your account is linked.  User ID %s.  Access Token <say-as interpret-as=\"characters\">%s</say-as>. "
         }
     }
 };
