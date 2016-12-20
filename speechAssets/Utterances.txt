@@ -1,0 +1,12 @@
+LinkAccountIntent Link card
+LinkAccountIntent Link account
+LinkAccountIntent Link to account
+LinkAccountIntent Link an account
+LinkAccountIntent Link to my account
+LinkAccountIntent Link Quizlet
+LinkAccountIntent Link Quizlet account
+LinkAccountIntent Link to Quizlet
+LinkAccountIntent Link to Quizlet account
+LinkAccountIntent Link to a Quizlet account
+LinkAccountIntent Link to my Quizlet
+LinkAccountIntent Link to my Quizlet account
