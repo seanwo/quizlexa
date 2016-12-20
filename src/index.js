@@ -25,13 +25,24 @@ var states = {
 
 var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'PromptMainMenu': function (prefix) {
+        var accessToken = this.event.session.user.accessToken;
+        console.log('token: ' + accessToken);
+        if (!accessToken) {
+            var speechOutput = this.t("LINK_ACCOUNT");
+            this.emit(':tellWithLinkAccountCard', speechOutput);
+        }
         var speechOutput = (prefix || "") + this.t("ASK_ME") + this.t("HOW_CAN_I_HELP");
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'LinkAccountIntent': function () {
-        var speechOutput = this.t("LINK_ACCOUNT");
-        this.emit(':tellWithLinkAccountCard', speechOutput);
+        var accessToken = this.event.session.user.accessToken;
+        if (!accessToken) {
+            var speechOutput = this.t("LINK_ACCOUNT");
+            this.emit(':tellWithLinkAccountCard', speechOutput);
+        }
+        var speechOutput = this.t("LINKED", accessToken);
+        this.emit(':tell', speechOutput);
     },
     'AMAZON.HelpIntent': function () {
         var speechOutput = this.t("HELP_MESSAGE", this.t("ASK_ME"), this.t("HOW_CAN_I_HELP"));
@@ -63,7 +74,8 @@ var languageStrings = {
             "HELP_MESSAGE": "%s, or, you can say exit...Now, %s",
             "STOP_MESSAGE": "Goodbye! ",
             "NO_UNDERSTAND": "Sorry, I don't quite understand what you mean. ",
-            "LINK_ACCOUNT": "Your Quizlet account is not linked.  Please use the Alexa app to link the account."
+            "LINK_ACCOUNT": "Your Quizlet account is not linked.  Please use the Alexa app to link the account.",
+            "LINKED": "Your account is linked.  Access Token <say-as interpret-as=\"characters\">%s</say-as>. "
         }
     }
 };
