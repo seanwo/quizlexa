@@ -1,3 +1,30 @@
+SelectFavoriteSetIntent Select a favorite set
+SelectFavoriteSetIntent Select one of my favorite sets
+SelectFavoriteSetIntent Pick a favorite set
+SelectFavoriteSetIntent Pick one of my favorite sets
+SelectFavoriteSetIntent Get a favorite set
+SelectFavoriteSetIntent Get one of my favorite sets
+SelectFavoriteSetIntent Get me a favorite set
+SelectFavoriteSetIntent Get me one of my favorite sets
+SelectFavoriteSetIntent Select a favorite
+SelectFavoriteSetIntent Pick a favorite
+SelectFavoriteSetIntent Get a favorite
+SelectFavoriteSetIntent Get me a favorite
+SelectFavoriteSetIntent Favorite set
+SelectFavoriteSetIntent Favorite
+SelectFavoriteSetIntent Favorites
+
+SelectSetIntent Select a set
+SelectSetIntent Select one of my sets
+SelectSetIntent Pick a set
+SelectSetIntent Pick one of my sets
+SelectSetIntent Get a set
+SelectSetIntent Get one of my sets
+SelectSetIntent Get me a set
+SelectSetIntent Get me one of my sets
+SelectSetIntent Set
+SelectSetIntent Sets
+
 LinkAccountIntent Link card
 LinkAccountIntent Link account
 LinkAccountIntent Link to account

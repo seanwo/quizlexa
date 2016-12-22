@@ -1,7 +1,23 @@
 {
     "intents": [
         {
+            "intent": "SelectFavoriteSetIntent",
+            "slots": []
+        },
+        {
+            "intent": "SelectSetIntent",
+            "slots": []
+        },
+        {
             "intent": "LinkAccountIntent",
+            "slots": []
+        },
+        {
+            "intent": "AMAZON.YesIntent",
+            "slots": []
+        },
+        {
+            "intent": "AMAZON.NoIntent",
             "slots": []
         },
         {
