@@ -39,3 +39,13 @@ SelectSetIntent Get one of my sets
 SelectSetIntent Search for a set
 SelectSetIntent Search for my set
 SelectSetIntent Search for one of my sets
+
+OneIntent One
+TwoIntent Two
+ThreeIntent Three
+FourIntent Four
+
+SetOneIntent Set One
+SetTwoIntent Set Two
+SetThreeIntent Set Three
+SetFourIntent Set Four

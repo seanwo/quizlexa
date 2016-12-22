@@ -13,13 +13,45 @@
             "slots": []
         },
         {
+            "intent": "OneIntent",
+            "slots": []
+        },
+        {
+            "intent": "TwoIntent",
+            "slots": []
+        },
+        {
+            "intent": "ThreeIntent",
+            "slots": []
+        },
+        {
+            "intent": "FourIntent",
+            "slots": []
+        },
+        {
+            "intent": "SetOneIntent",
+            "slots": []
+        },
+        {
+            "intent": "SetTwoIntent",
+            "slots": []
+        },
+        {
+            "intent": "SetThreeIntent",
+            "slots": []
+        },
+        {
+            "intent": "SetFourIntent",
+            "slots": []
+        },
+        {
             "intent": "AMAZON.YesIntent",
             "slots": []
         },
         {
             "intent": "AMAZON.NoIntent",
             "slots": []
-        },
+        },        
         {
             "intent": "AMAZON.RepeatIntent",
             "slots": []
@@ -34,6 +66,10 @@
         },
         {
             "intent": "AMAZON.StopIntent",
+            "slots": []
+        },
+        {
+            "intent": "AMAZON.StartOverIntent",
             "slots": []
         },
         {
