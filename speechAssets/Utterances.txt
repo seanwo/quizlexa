@@ -1,39 +1,41 @@
-SelectFavoriteSetIntent Select a favorite set
-SelectFavoriteSetIntent Select one of my favorite sets
-SelectFavoriteSetIntent Pick a favorite set
-SelectFavoriteSetIntent Pick one of my favorite sets
-SelectFavoriteSetIntent Get a favorite set
-SelectFavoriteSetIntent Get one of my favorite sets
-SelectFavoriteSetIntent Get me a favorite set
-SelectFavoriteSetIntent Get me one of my favorite sets
-SelectFavoriteSetIntent Select a favorite
-SelectFavoriteSetIntent Pick a favorite
-SelectFavoriteSetIntent Get a favorite
-SelectFavoriteSetIntent Get me a favorite
-SelectFavoriteSetIntent Favorite set
 SelectFavoriteSetIntent Favorite
 SelectFavoriteSetIntent Favorites
+SelectFavoriteSetIntent Favorite set
+SelectFavoriteSetIntent Select a favorite
+SelectFavoriteSetIntent Select a favorite set
+SelectFavoriteSetIntent Select my favorite set
+SelectFavoriteSetIntent Select one of my favorite sets
+SelectFavoriteSetIntent Find a favorite
+SelectFavoriteSetIntent Find a favorite set
+SelectFavoriteSetIntent Find my favorite set
+SelectFavoriteSetIntent Find one of my favorite sets
+SelectFavoriteSetIntent Pick a favorite
+SelectFavoriteSetIntent Pick a favorite set
+SelectFavoriteSetIntent Pick my favorite set
+SelectFavoriteSetIntent Pick one of my favorite sets
+SelectFavoriteSetIntent Get a favorite
+SelectFavoriteSetIntent Get a favorite set
+SelectFavoriteSetIntent Get my favorite set
+SelectFavoriteSetIntent Get one of my favorite sets
+SelectFavoriteSetIntent Search for a favorite
+SelectFavoriteSetIntent Search for a favorite set
+SelectFavoriteSetIntent Search for my favorite set
+SelectFavoriteSetIntent Search for one of my favorite sets
 
-SelectSetIntent Select a set
-SelectSetIntent Select one of my sets
-SelectSetIntent Pick a set
-SelectSetIntent Pick one of my sets
-SelectSetIntent Get a set
-SelectSetIntent Get one of my sets
-SelectSetIntent Get me a set
-SelectSetIntent Get me one of my sets
 SelectSetIntent Set
 SelectSetIntent Sets
-
-LinkAccountIntent Link card
-LinkAccountIntent Link account
-LinkAccountIntent Link to account
-LinkAccountIntent Link an account
-LinkAccountIntent Link to my account
-LinkAccountIntent Link Quizlet
-LinkAccountIntent Link Quizlet account
-LinkAccountIntent Link to Quizlet
-LinkAccountIntent Link to Quizlet account
-LinkAccountIntent Link to a Quizlet account
-LinkAccountIntent Link to my Quizlet
-LinkAccountIntent Link to my Quizlet account
+SelectSetIntent Select a set
+SelectSetIntent Select my set
+SelectSetIntent Select one of my sets
+SelectSetIntent Find a set
+SelectSetIntent Find my set
+SelectSetIntent Find one of my sets
+SelectSetIntent Pick a set
+SelectSetIntent Pick my set
+SelectSetIntent Pick one of my sets
+SelectSetIntent Get a set
+SelectSetIntent Get my set
+SelectSetIntent Get one of my sets
+SelectSetIntent Search for a set
+SelectSetIntent Search for my set
+SelectSetIntent Search for one of my sets
