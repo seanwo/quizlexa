@@ -9,6 +9,7 @@
   "author": "Sean Wohlgemuth",
   "license": "ISC",
   "dependencies": {
-    "alexa-sdk": "^1.0.6"
+    "alexa-sdk": "^1.0.6",
+    "quizlet-api": "file:quizlet-api-1.0.0.tgz"
   }
 }
