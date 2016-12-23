@@ -95,6 +95,15 @@
         {
             "intent": "AMAZON.HelpIntent",
             "slots": []
+        },
+        {
+            "intent": "CatchAllIntent",
+            "slots": [
+                {
+                    "name": "CatchAll",
+                    "type": "CatchAll"
+                }
+            ]
         }
     ]
 }

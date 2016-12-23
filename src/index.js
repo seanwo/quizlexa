@@ -49,7 +49,47 @@ var entryPointHandlers = {
             quizlet.user_id = token.user_id;
             this.emitWithState('MainMenu', speechOutput);
         }
-    }
+    },
+    'SelectFavoriteSetIntent': function () {
+        var accessToken = this.event.session.user.accessToken;
+        this.handler.state = states.MAINMENU;
+        if (!accessToken) {
+            this.emitWithState('LinkAccountIntent');
+        } else {
+            var token = parseToken(accessToken);
+            quizlet.access_token = token.access_token;
+            quizlet.user_id = token.user_id;
+            this.handler.state = states.QUERYQUIZLET;
+            this.emitWithState('QueryUserFavorites');
+        }
+    },
+    'SelectSetIntent': function () {
+        var accessToken = this.event.session.user.accessToken;
+        this.handler.state = states.MAINMENU;
+        if (!accessToken) {
+            this.emitWithState('LinkAccountIntent');
+        } else {
+            var token = parseToken(accessToken);
+            quizlet.access_token = token.access_token;
+            quizlet.user_id = token.user_id;
+            this.handler.state = states.QUERYQUIZLET;
+            this.emitWithState('QueryUserSets');
+        }
+    },
+    'SelectClassIntent': function () {
+        var accessToken = this.event.session.user.accessToken;
+        this.handler.state = states.MAINMENU;
+        if (!accessToken) {
+            this.emitWithState('LinkAccountIntent');
+        } else {
+            var token = parseToken(accessToken);
+            quizlet.access_token = token.access_token;
+            quizlet.user_id = token.user_id;
+            this.handler.state = states.QUERYQUIZLET;
+            this.emitWithState('QueryUserClasses');
+        }
+    },
+
 }
 
 var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
@@ -95,8 +135,12 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
+    'AMAZON.StartOverIntent': function () {
+        this.handler.state = states.MAINMENU;
+        this.emitWithState('MainMenu');
+    },
     'AMAZON.HelpIntent': function () {
-        var speechOutput = this.t("HELP_MESSAGE", this.t("ASK_ME"), this.t("HOW_CAN_I_HELP"));
+        var speechOutput = this.t("HELP_MESSAGE", this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, speechOutput);
     },
     'Unhandled': function () {
@@ -212,24 +256,28 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = this.t("ONE_SET") + this.t("SET_NAME_IS", title) + this.t("ASK_USE_SET");
                 var repromptSpeech = this.t("ASK_USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             case dataType.FAVORITE_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = this.t("ONE_FAVORITE_SET") + this.t("SET_NAME_IS", title) + this.t("ASK_USE_SET");
                 var repromptSpeech = this.t("ASK_USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             case dataType.CLASS_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = this.t("ONE_CLASS_SET") + this.t("SET_NAME_IS", title) + this.t("ASK_USE_SET");
                 var repromptSpeech = this.t("ASK_USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             case dataType.CLASS:
                 var name = this.attributes['quizlet'].data[this.attributes['quizlet'].index].name;
                 var speechOutput = this.t("ONE_CLASS") + this.t("CLASS_NAME_IS", name) + this.t("ASK_USE_CLASS");
                 var repromptSpeech = this.t("ASK_USE_CLASS_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             default:
@@ -270,11 +318,11 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
         this.emitWithState('MainMenu');
     },
     'AMAZON.HelpIntent': function () {
-        var speechOutput = this.t("UNDEFINED");
-        this.emit(':ask', speechOutput, speechOutput);
+        var speechOutput = this.attributes["reprompt"];
+        this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
-        var speechOutput = this.t("NO_UNDERSTAND");
+        var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     }
@@ -322,6 +370,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             repromptSpeech += say_next_more_x;
         }
         repromptSpeech += this.t("ASK_CHOOSE_REPROMPTB");
+        this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'SetOneIntent': function () {
@@ -505,11 +554,11 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         this.emitWithState('MainMenu');
     },
     'AMAZON.HelpIntent': function () {
-        var speechOutput = this.t("UNDEFINED");
-        this.emit(':ask', speechOutput, speechOutput);
+        var speechOutput = this.attributes["reprompt"];
+        this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
-        var speechOutput = this.t("NO_UNDERSTAND");
+        var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     }
@@ -538,10 +587,9 @@ const languageStrings = {
             "SKILL_NAME": "Quizlexa",
             "WELCOME_MESSAGE": "Welcome to %s. ",
             "HOW_CAN_I_HELP": "How can I help you? ",
-            //"ASK_ME": "You can ask me to select a favorite set or, select a set, or select a class. ",
-            "ASK_ME": " ",
+            "ASK_ME": "You can ask me to find a favorite set, find a set, or find a class. ",
             "HELP_ME": "For instructions on what you can say, please say help me. ",
-            "HELP_MESSAGE": "%s, or, you can say exit...Now, %s",
+            "HELP_MESSAGE": "You can ask me to find a favorite set, find a set, find a class, or you can say exit...Now, %s",
             "STOP_MESSAGE": "Goodbye! ",
             "NO_UNDERSTAND": "Sorry, I don't quite understand what you mean. ",
             "LINK_ACCOUNT": "Your Quizlet account is not linked.  Please use the Alexa app to link your account. ",
@@ -556,9 +604,9 @@ const languageStrings = {
             "SET": "Set ",
             "CLASS": "Class ",
             "ASK_USE_SET": "Do you want to use this set? ",
-            "ASK_USE_SET_REPROMPT": "Say yes to use the set. Say no to return to the main menu. Say repeat to hear the set again. Or say help me for more options. ",
+            "ASK_USE_SET_REPROMPT": "Say yes to use the set. Say no to return to the main menu. Say repeat to hear the set again. Say start over to return to the main menu. Or say help me to hear these options again. ",
             "ASK_USE_CLASS": "Do you want to use this class? ",
-            "ASK_USE_CLASS_REPROMPT": "Say yes to use the class. Say no to return to the main menu. Say repeat to hear the class again. Or say help me for more options. ",
+            "ASK_USE_CLASS_REPROMPT": "Say yes to use the class. Say no to return to the main menu. Say repeat to hear the class again. Say start over to return to the main menu. Or say help me to hear these options again. ",
             "ASK_CHOOSE_SET": "Please choose from the following sets. ",
             "ASK_CHOOSE_CLASS": "Please choose from the following classes. ",
             "OR_SAY_NEXT_MORE_SETS": "Or say next for more sets. ",
@@ -567,7 +615,7 @@ const languageStrings = {
             "ASK_CHOOSE_CLASS_REPROMPTA": "Say the number of the class you want. Say repeat to hear the choices again. ",
             "SAY_NEXT_MORE_SETS": "Say next for more sets. ",
             "SAY_NEXT_MORE_CLASSES": "Say next for more classes. ",
-            "ASK_CHOOSE_REPROMPTB": "Or say help me to hear more options. ",
+            "ASK_CHOOSE_REPROMPTB": "Say start over to return to the main menu. Or say help me to hear these options again. ",
             "SET_NAME_IS": "The set name is %s. ",
             "CLASS_NAME_IS": "The class name is %s. ",
             "UNEXPECTED": "An unexpected error has occurred.  Please try again later! ",

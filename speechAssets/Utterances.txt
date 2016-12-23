@@ -1,74 +1,70 @@
-SelectFavoriteSetIntent Favorite
-SelectFavoriteSetIntent Favorites
-SelectFavoriteSetIntent Favorite set
-SelectFavoriteSetIntent Select a favorite
-SelectFavoriteSetIntent Select a favorite set
-SelectFavoriteSetIntent Select my favorite set
-SelectFavoriteSetIntent Select one of my favorite sets
-SelectFavoriteSetIntent Find a favorite
-SelectFavoriteSetIntent Find a favorite set
-SelectFavoriteSetIntent Find my favorite set
-SelectFavoriteSetIntent Find one of my favorite sets
-SelectFavoriteSetIntent Pick a favorite
-SelectFavoriteSetIntent Pick a favorite set
-SelectFavoriteSetIntent Pick my favorite set
-SelectFavoriteSetIntent Pick one of my favorite sets
-SelectFavoriteSetIntent Get a favorite
-SelectFavoriteSetIntent Get a favorite set
-SelectFavoriteSetIntent Get my favorite set
-SelectFavoriteSetIntent Get one of my favorite sets
-SelectFavoriteSetIntent Search for a favorite
-SelectFavoriteSetIntent Search for a favorite set
-SelectFavoriteSetIntent Search for my favorite set
-SelectFavoriteSetIntent Search for one of my favorite sets
-
-SelectSetIntent Set
-SelectSetIntent Sets
-SelectSetIntent Select a set
-SelectSetIntent Select my set
-SelectSetIntent Select one of my sets
-SelectSetIntent Find a set
-SelectSetIntent Find my set
-SelectSetIntent Find one of my sets
-SelectSetIntent Pick a set
-SelectSetIntent Pick my set
-SelectSetIntent Pick one of my sets
-SelectSetIntent Get a set
-SelectSetIntent Get my set
-SelectSetIntent Get one of my sets
-SelectSetIntent Search for a set
-SelectSetIntent Search for my set
-SelectSetIntent Search for one of my sets
-
-SelectClassIntent Class
-SelectClassIntent Classes
-SelectClassIntent Select a class
-SelectClassIntent Select my class
-SelectClassIntent Select one of my classes
-SelectClassIntent Find a class
-SelectClassIntent Find my class
-SelectClassIntent Find one of my classes
-SelectClassIntent Pick a class
-SelectClassIntent Pick my class
-SelectClassIntent Pick one of my classes
-SelectClassIntent Get a class
-SelectClassIntent Get my set
-SelectClassIntent Get one of my classes
-SelectClassIntent Search for a class
-SelectClassIntent Search for my class
-SelectClassIntent Search for one of my classes
-
-OneIntent One
-TwoIntent Two
-ThreeIntent Three
-FourIntent Four
-
-SetOneIntent Set One
-SetTwoIntent Set Two
-SetThreeIntent Set Three
-SetFourIntent Set Four
-
-ClassOneIntent Class One
-ClassTwoIntent Class Two
-ClassThreeIntent Class Three
-ClassFourIntent Class Four
+SelectFavoriteSetIntent favorite
+SelectFavoriteSetIntent favorites
+SelectFavoriteSetIntent favorite set
+SelectFavoriteSetIntent select a favorite
+SelectFavoriteSetIntent select a favorite set
+SelectFavoriteSetIntent select my favorite set
+SelectFavoriteSetIntent select one of my favorite sets
+SelectFavoriteSetIntent find a favorite
+SelectFavoriteSetIntent find a favorite set
+SelectFavoriteSetIntent find my favorite set
+SelectFavoriteSetIntent find one of my favorite sets
+SelectFavoriteSetIntent pick a favorite
+SelectFavoriteSetIntent pick a favorite set
+SelectFavoriteSetIntent pick my favorite set
+SelectFavoriteSetIntent pick one of my favorite sets
+SelectFavoriteSetIntent get a favorite
+SelectFavoriteSetIntent get a favorite set
+SelectFavoriteSetIntent get my favorite set
+SelectFavoriteSetIntent get one of my favorite sets
+SelectFavoriteSetIntent search for a favorite
+SelectFavoriteSetIntent search for a favorite set
+SelectFavoriteSetIntent search for my favorite set
+SelectFavoriteSetIntent search for one of my favorite sets
+SelectSetIntent set
+SelectSetIntent sets
+SelectSetIntent select a set
+SelectSetIntent select my set
+SelectSetIntent select one of my sets
+SelectSetIntent find a set
+SelectSetIntent find my set
+SelectSetIntent find one of my sets
+SelectSetIntent pick a set
+SelectSetIntent pick my set
+SelectSetIntent pick one of my sets
+SelectSetIntent get a set
+SelectSetIntent get my set
+SelectSetIntent get one of my sets
+SelectSetIntent search for a set
+SelectSetIntent search for my set
+SelectSetIntent search for one of my sets
+SelectClassIntent class
+SelectClassIntent classes
+SelectClassIntent select a class
+SelectClassIntent select my class
+SelectClassIntent select one of my classes
+SelectClassIntent find a class
+SelectClassIntent find my class
+SelectClassIntent find one of my classes
+SelectClassIntent pick a class
+SelectClassIntent pick my class
+SelectClassIntent pick one of my classes
+SelectClassIntent get a class
+SelectClassIntent get my set
+SelectClassIntent get one of my classes
+SelectClassIntent search for a class
+SelectClassIntent search for my class
+SelectClassIntent search for one of my classes
+OneIntent one
+TwoIntent two
+ThreeIntent three
+FourIntent four
+SetOneIntent set one
+SetTwoIntent set two
+SetThreeIntent set three
+SetFourIntent set four
+ClassOneIntent class one
+ClassTwoIntent class two
+ClassThreeIntent class three
+ClassFourIntent class four
+CatchAllIntent {CatchAll}
