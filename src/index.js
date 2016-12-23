@@ -3,8 +3,11 @@
 const Alexa = require('alexa-sdk');
 var APP_ID = undefined; // TODO replace with your app ID (OPTIONAL).
 
+const AWS = require('aws-sdk');
+var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' })
+
 const QuizletAPI = require('quizlet-api').QuizletAPI;
-var quizlet = new QuizletAPI('', '');
+var quizlet;
 
 exports.handler = function (event, context, callback) {
     var alexa = Alexa.handler(event, context);
@@ -29,12 +32,52 @@ const states = {
 
 const dataType = {
     SET: 0,
-    FAVORITE_SET: 1,
-    CLASS_SET: 2,
-    CLASS: 3
+    LAST_SET: 1,
+    FAVORITE_SET: 2,
+    CLASS_SET: 3,
+    CLASS: 4
 };
 
 const ITEMS_PER_PAGE = 4;
+
+function StoreSetId(userId, id) {
+    return new Promise(
+        function (resolve, reject) {
+            dynamodb.putItem({
+                TableName: 'QuizlexaUserData',
+                Item: {
+                    CustomerId: { S: userId },
+                    Data: { S: id.toString() }
+                }
+            }, function (err, data) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        }
+    )
+};
+
+function LoadSetId(userId) {
+    return new Promise(
+        function (resolve, reject) {
+            dynamodb.getItem({
+                TableName: 'QuizlexaUserData',
+                Key: {
+                    CustomerId: { S: userId }
+                }
+            }, function (err, data) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        }
+    )
+};
 
 var entryPointHandlers = {
     'LaunchRequest': function () {
@@ -45,51 +88,29 @@ var entryPointHandlers = {
             this.emitWithState('LinkAccountIntent');
         } else {
             var token = parseToken(accessToken);
-            quizlet.access_token = token.access_token;
-            quizlet.user_id = token.user_id;
-            this.emitWithState('MainMenu', speechOutput);
+            quizlet = new QuizletAPI(token.user_id, token.access_token);
+            console.log("userId: " + this.event.session.user.userId);
+            LoadSetId(this.event.session.user.userId)
+                .then((data) => {
+                    console.log(JSON.stringify(data));
+                    if ((data.Item !== undefined) && (data.Item.Data !== undefined)) {
+                        this.handler.state = states.QUERYQUIZLET;
+                        this.emitWithState('QuerySet', data.Item.Data.S);
+                    } else {
+                        this.handler.state = states.MAINMENU;
+                        this.emitWithState('MainMenu', speechOutput);
+                    }
+                })
+                .catch((err) => {
+                    console.error('error retrieving previous set: ' + err);
+                    this.emit(":tell", this.t("UNEXPECTED"));
+                });
         }
     },
-    'SelectFavoriteSetIntent': function () {
-        var accessToken = this.event.session.user.accessToken;
-        this.handler.state = states.MAINMENU;
-        if (!accessToken) {
-            this.emitWithState('LinkAccountIntent');
-        } else {
-            var token = parseToken(accessToken);
-            quizlet.access_token = token.access_token;
-            quizlet.user_id = token.user_id;
-            this.handler.state = states.QUERYQUIZLET;
-            this.emitWithState('QueryUserFavorites');
-        }
-    },
-    'SelectSetIntent': function () {
-        var accessToken = this.event.session.user.accessToken;
-        this.handler.state = states.MAINMENU;
-        if (!accessToken) {
-            this.emitWithState('LinkAccountIntent');
-        } else {
-            var token = parseToken(accessToken);
-            quizlet.access_token = token.access_token;
-            quizlet.user_id = token.user_id;
-            this.handler.state = states.QUERYQUIZLET;
-            this.emitWithState('QueryUserSets');
-        }
-    },
-    'SelectClassIntent': function () {
-        var accessToken = this.event.session.user.accessToken;
-        this.handler.state = states.MAINMENU;
-        if (!accessToken) {
-            this.emitWithState('LinkAccountIntent');
-        } else {
-            var token = parseToken(accessToken);
-            quizlet.access_token = token.access_token;
-            quizlet.user_id = token.user_id;
-            this.handler.state = states.QUERYQUIZLET;
-            this.emitWithState('QueryUserClasses');
-        }
-    },
-
+    'Unhandled': function () {
+        this.handler.state = '';
+        this.emitWithState('LaunchRequest');
+    }
 }
 
 var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
@@ -194,7 +215,6 @@ var queryQuizletHandlers = Alexa.CreateStateHandler(states.QUERYQUIZLET, {
     },
     'QueryClassSets': function () {
         var class_id = this.attributes['quizlet'].class_id;
-        console.log("class_id: " + class_id);
         quizlet.getClassSets(class_id)
             .then((data) => {
                 if (data.length == 0) {
@@ -236,6 +256,21 @@ var queryQuizletHandlers = Alexa.CreateStateHandler(states.QUERYQUIZLET, {
                 this.emit(":tell", this.t("QUIZLETERROR"));
             });
     },
+    'QuerySet': function (set_id) {
+        quizlet.getSet(set_id)
+            .then((data) => {
+                this.attributes['quizlet'] = {};
+                this.attributes['quizlet'].type = dataType.LAST_SET;
+                this.attributes['quizlet'].data = new Array(data);
+                this.attributes['quizlet'].index = 0;
+                this.handler.state = states.QUERYQUIZLET;
+                this.emitWithState('SelectOption');
+            })
+            .catch((err) => {
+                console.error('error getting set: ' + err);
+                this.emit(":tell", this.t("QUIZLETERROR"));
+            });
+    },
     'SelectOption': function () {
         var length = this.attributes['quizlet'].data.length;
         if (length == 1) {
@@ -255,6 +290,13 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
             case dataType.SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = this.t("ONE_SET") + this.t("SET_NAME_IS", title) + this.t("ASK_USE_SET");
+                var repromptSpeech = this.t("ASK_USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
+                this.emit(':ask', speechOutput, repromptSpeech);
+                break;
+            case dataType.LAST_SET:
+                var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
+                var speechOutput = this.t("LAST_SET", title) + this.t("ASK_USE_SET");
                 var repromptSpeech = this.t("ASK_USE_SET_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
@@ -294,7 +336,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
             this.emitWithState('QueryClassSets');
         } else {
             this.handler.state = states.SETMENU;
-            this.emitWithState('ConfirmSetIntent');
+            this.emitWithState('SelectSet');
         }
     },
     'AMAZON.NoIntent': function () {
@@ -462,7 +504,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             this.emitWithState('QueryClassSets');
         } else {
             this.handler.state = states.SETMENU;
-            this.emitWithState('ConfirmSetIntent');
+            this.emitWithState('SelectSet');
         }
     },
     'TwoIntent': function () {
@@ -481,7 +523,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
                 this.emitWithState('QueryClassSets');
             } else {
                 this.handler.state = states.SETMENU;
-                this.emitWithState('ConfirmSetIntent');
+                this.emitWithState('SelectSet');
             }
         }
     },
@@ -501,7 +543,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
                 this.emitWithState('QueryClassSets');
             } else {
                 this.handler.state = states.SETMENU;
-                this.emitWithState('ConfirmSetIntent');
+                this.emitWithState('SelectSet');
             }
         }
     },
@@ -521,7 +563,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
                 this.emitWithState('QueryClassSets');
             } else {
                 this.handler.state = states.SETMENU;
-                this.emitWithState('ConfirmSetIntent');
+                this.emitWithState('SelectSet');
             }
         }
     },
@@ -565,12 +607,50 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
 });
 
 var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
-    'ConfirmSetIntent': function () {
+    'SelectSet': function () {
         var set = this.attributes['quizlet'].data[this.attributes['quizlet'].index];
         this.attributes['quizlet'].set = set;
         this.attributes['quizlet'].data = undefined;
         this.attributes['quizlet'].index = undefined;
-        this.emit(':tell', "You have chosen the set named " + set.title + ". It has " + set.terms.length + " terms in this set. ");
+        this.attributes['quizlet'].type = undefined;
+        StoreSetId(this.event.session.user.userId, set.id)
+            .then((data) => {
+                this.handler.state = states.SETMENU;
+                this.emitWithState('CheckIsFavorite');
+            })
+            .catch((err) => {
+                console.error('error storing previous set: ' + err);
+                this.emit(":tell", this.t("UNEXPECTED"));
+            });
+    },
+    'CheckIsFavorite': function () {
+        var id = this.attributes['quizlet'].set.id;
+        quizlet.getUserFavorites()
+            .then((data) => {
+                this.attributes['quizlet'].favorite = false;
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].id === id) {
+                        this.attributes['quizlet'].favorite = true;
+                        break;
+                    }
+                }
+                this.handler.state = states.SETMENU;
+                this.emitWithState('ReturnSetInfo');
+            })
+            .catch((err) => {
+                console.error('error getting favorite sets: ' + err);
+                this.emit(":tell", this.t("QUIZLETERROR"));
+            });
+    },
+    'ReturnSetInfo': function () {
+        var set = this.attributes['quizlet'].set;
+        var favoriteState;
+        if (this.attributes['quizlet'].favorite === true) {
+            favoriteState = "This set is a favorite";
+        } else {
+            favoriteState = "This set is not a favorite";
+        }
+        this.emit(':tell', "You have chosen the set with the name " + set.title + ". It has " + set.terms.length + " terms in this set. " + favoriteState);
     }
 });
 
@@ -601,6 +681,7 @@ const languageStrings = {
             "ONE_FAVORITE_SET": "You have one favorite set. ",
             "ONE_CLASS_SET": "You have one set in this class. ",
             "ONE_CLASS": "You have one class. ",
+            "LAST_SET": "The last set you used is named %s. ",
             "SET": "Set ",
             "CLASS": "Class ",
             "ASK_USE_SET": "Do you want to use this set? ",
