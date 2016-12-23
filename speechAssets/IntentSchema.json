@@ -49,6 +49,22 @@
             "slots": []
         },
         {
+            "intent": "ClassOneIntent",
+            "slots": []
+        },
+        {
+            "intent": "ClassTwoIntent",
+            "slots": []
+        },
+        {
+            "intent": "ClassThreeIntent",
+            "slots": []
+        },
+        {
+            "intent": "ClassFourIntent",
+            "slots": []
+        },
+        {
             "intent": "AMAZON.YesIntent",
             "slots": []
         },

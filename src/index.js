@@ -284,38 +284,133 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
     'SelectNavItemFromList': function () {
         var data = this.attributes['quizlet'].data;
         var index = this.attributes['quizlet'].index;
-        var speechOutput = this.t("ASK_CHOOSE_SET") + "<break time=\"1s\"/>";
+        var type = this.attributes['quizlet'].type;
+
+        var ask_choose_x;
+        var data_type;
+        var ask_choose_x_reprompta;
+        var or_say_next_more_x;
+        var say_next_more_x;
+
+        if (type == dataType.CLASS) {
+            ask_choose_x = this.t("ASK_CHOOSE_CLASS");
+            data_type = this.t("CLASS");
+            ask_choose_x_reprompta = this.t("ASK_CHOOSE_CLASS_REPROMPTA");
+            or_say_next_more_x = this.t("OR_SAY_NEXT_MORE_CLASSES");
+            say_next_more_x = this.t("SAY_NEXT_MORE_CLASSES");
+        } else {
+            ask_choose_x = this.t("ASK_CHOOSE_SET");
+            data_type = this.t("SET");
+            ask_choose_x_reprompta = this.t("ASK_CHOOSE_SET_REPROMPTA");
+            or_say_next_more_x = this.t("OR_SAY_NEXT_MORE_SETS");
+            say_next_more_x = this.t("SAY_NEXT_MORE_SETS");
+        }
+
+        var speechOutput = ask_choose_x + "<break time=\"1s\"/>";
         for (var i = 0; i < Math.min(ITEMS_PER_PAGE, data.length - index); i++) {
-            speechOutput += this.t("SET") + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + data[i + index].title + "<break time=\"1s\"/>";
+            var option;
+            if (type == dataType.CLASS) {
+                option = data[i + index].name;
+            } else {
+                option = data[i + index].title;
+            }
+            speechOutput += data_type + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + option + "<break time=\"1s\"/>";
         }
-        var repromptSpeech = this.t("ASK_CHOOSE_SET_REPROMPTA");
+        var repromptSpeech = ask_choose_x_reprompta;
         if (data.length - index > ITEMS_PER_PAGE) {
-            speechOutput += this.t("OR_SAY_NEXT_MORE_SETS");
-            repromptSpeech += this.t("SAY_NEXT_MORE_SETS");
+            speechOutput += or_say_next_more_x;
+            repromptSpeech += say_next_more_x;
         }
-        repromptSpeech += this.t("ASK_CHOOSE_SET_REPROMPTB");
+        repromptSpeech += this.t("ASK_CHOOSE_REPROMPTB");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'SetOneIntent': function () {
-        this.handler.state = states.SELECTNAVITEMFROMLIST;
-        this.emitWithState('OneIntent');
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('OneIntent');
+        }
     },
     'SetTwoIntent': function () {
-        this.handler.state = states.SELECTNAVITEMFROMLIST;
-        this.emitWithState('TwoIntent');
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('TwoIntent');
+        }
     },
     'SetThreeIntent': function () {
-        this.handler.state = states.SELECTNAVITEMFROMLIST;
-        this.emitWithState('ThreeIntent');
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('ThreeIntent');
+        }
     },
     'SetFourIntent': function () {
-        this.handler.state = states.SELECTNAVITEMFROMLIST;
-        this.emitWithState('FourIntent');
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('FourIntent');
+        }
+    },
+    'ClassOneIntent': function () {
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('OneIntent');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        }
+    },
+    'ClassTwoIntent': function () {
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('TwoIntent');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        }
+    },
+    'ClassThreeIntent': function () {
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('ThreeIntent');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        }
+    },
+    'ClassFourIntent': function () {
+        var type = this.attributes['quizlet'].type;
+        if (type == dataType.CLASS) {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('FourIntent');
+        } else {
+            this.handler.state = states.SELECTNAVITEMFROMLIST;
+            this.emitWithState('Unhandled');
+        }
     },
     'OneIntent': function () {
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
-            this.emit(":tell", this.t("NOTIMPL"));
+            var class_id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
+            this.attributes["quizlet"].class_id = class_id;
+            this.handler.state = states.QUERYQUIZLET;
+            this.emitWithState('QueryClassSets');
         } else {
             this.handler.state = states.SETMENU;
             this.emitWithState('ConfirmSetIntent');
@@ -331,7 +426,10 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             this.attributes['quizlet'].index += 1;
             var type = this.attributes['quizlet'].type;
             if (type == dataType.CLASS) {
-                this.emit(":tell", this.t("NOTIMPL"));
+                var class_id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
+                this.attributes["quizlet"].class_id = class_id;
+                this.handler.state = states.QUERYQUIZLET;
+                this.emitWithState('QueryClassSets');
             } else {
                 this.handler.state = states.SETMENU;
                 this.emitWithState('ConfirmSetIntent');
@@ -348,7 +446,10 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             this.attributes['quizlet'].index += 2;
             var type = this.attributes['quizlet'].type;
             if (type == dataType.CLASS) {
-                this.emit(":tell", this.t("NOTIMPL"));
+                var class_id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
+                this.attributes["quizlet"].class_id = class_id;
+                this.handler.state = states.QUERYQUIZLET;
+                this.emitWithState('QueryClassSets');
             } else {
                 this.handler.state = states.SETMENU;
                 this.emitWithState('ConfirmSetIntent');
@@ -365,7 +466,10 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             this.attributes['quizlet'].index += 3;
             var type = this.attributes['quizlet'].type;
             if (type == dataType.CLASS) {
-                this.emit(":tell", this.t("NOTIMPL"));
+                var class_id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
+                this.attributes["quizlet"].class_id = class_id;
+                this.handler.state = states.QUERYQUIZLET;
+                this.emitWithState('QueryClassSets');
             } else {
                 this.handler.state = states.SETMENU;
                 this.emitWithState('ConfirmSetIntent');
@@ -443,26 +547,29 @@ const languageStrings = {
             "LINK_ACCOUNT": "Your Quizlet account is not linked.  Please use the Alexa app to link your account. ",
             "NO_SETS": "You do not have any sets yet. Go to Quizlet dot com and add some sets to use.  Goodbye! ",
             "NO_FAVORITE_SETS": "You do not have any favorite sets yet. ",
-            "NO_CLASS_SETS": "You do not have any class sets yet. ",
-            "NO_CLASSES": "You have not set up any classes yet. ",
+            "NO_CLASS_SETS": "You do not have any sets in this class yet. ",
+            "NO_CLASSES": "You have not set up any classes set up yet. ",
             "ONE_SET": "You have one set. ",
             "ONE_FAVORITE_SET": "You have one favorite set. ",
-            "ONE_CLASS_SET": "You have one class set. ",
+            "ONE_CLASS_SET": "You have one set in this class. ",
             "ONE_CLASS": "You have one class. ",
             "SET": "Set ",
-            "CLASS": "Set ",
+            "CLASS": "Class ",
             "ASK_USE_SET": "Do you want to use this set? ",
             "ASK_USE_SET_REPROMPT": "Say yes to use the set. Say no to return to the main menu. Say repeat to hear the set again. Or say help me for more options. ",
             "ASK_USE_CLASS": "Do you want to use this class? ",
             "ASK_USE_CLASS_REPROMPT": "Say yes to use the class. Say no to return to the main menu. Say repeat to hear the class again. Or say help me for more options. ",
-
             "ASK_CHOOSE_SET": "Please choose from the following sets. ",
+            "ASK_CHOOSE_CLASS": "Please choose from the following classes. ",
             "OR_SAY_NEXT_MORE_SETS": "Or say next for more sets. ",
+            "OR_SAY_NEXT_MORE_CLASSES": "Or say next for more classes. ",
             "ASK_CHOOSE_SET_REPROMPTA": "Say the number of the set you want. Say repeat to hear the choices again. ",
+            "ASK_CHOOSE_CLASS_REPROMPTA": "Say the number of the class you want. Say repeat to hear the choices again. ",
             "SAY_NEXT_MORE_SETS": "Say next for more sets. ",
-            "ASK_CHOOSE_SET_REPROMPTB": "Or say help me to hear more options. ",
-            "SET_NAME_IS": "Your set name is %s. ",
-            "CLASS_NAME_IS": "Your class name is %s. ",
+            "SAY_NEXT_MORE_CLASSES": "Say next for more classes. ",
+            "ASK_CHOOSE_REPROMPTB": "Or say help me to hear more options. ",
+            "SET_NAME_IS": "The set name is %s. ",
+            "CLASS_NAME_IS": "The class name is %s. ",
             "UNEXPECTED": "An unexpected error has occurred.  Please try again later! ",
             "QUIZLETERROR": "There was an error communicating with Quizlet.  Please try again later! ",
             "UNDEFINED": "This text is undefined. ",

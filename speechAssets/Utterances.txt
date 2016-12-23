@@ -67,3 +67,8 @@ SetOneIntent Set One
 SetTwoIntent Set Two
 SetThreeIntent Set Three
 SetFourIntent Set Four
+
+ClassOneIntent Class One
+ClassTwoIntent Class Two
+ClassThreeIntent Class Three
+ClassFourIntent Class Four
