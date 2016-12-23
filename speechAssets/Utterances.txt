@@ -40,6 +40,24 @@ SelectSetIntent Search for a set
 SelectSetIntent Search for my set
 SelectSetIntent Search for one of my sets
 
+SelectClassIntent Class
+SelectClassIntent Classes
+SelectClassIntent Select a class
+SelectClassIntent Select my class
+SelectClassIntent Select one of my classes
+SelectClassIntent Find a class
+SelectClassIntent Find my class
+SelectClassIntent Find one of my classes
+SelectClassIntent Pick a class
+SelectClassIntent Pick my class
+SelectClassIntent Pick one of my classes
+SelectClassIntent Get a class
+SelectClassIntent Get my set
+SelectClassIntent Get one of my classes
+SelectClassIntent Search for a class
+SelectClassIntent Search for my class
+SelectClassIntent Search for one of my classes
+
 OneIntent One
 TwoIntent Two
 ThreeIntent Three

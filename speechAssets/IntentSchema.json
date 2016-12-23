@@ -1,11 +1,15 @@
 {
     "intents": [
         {
+            "intent": "SelectSetIntent",
+            "slots": []
+        },
+        {
             "intent": "SelectFavoriteSetIntent",
             "slots": []
         },
         {
-            "intent": "SelectSetIntent",
+            "intent": "SelectClassIntent",
             "slots": []
         },
         {
