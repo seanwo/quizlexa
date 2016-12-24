@@ -89,13 +89,11 @@ var entryPointHandlers = {
         } else {
             var token = parseToken(accessToken);
             quizlet = new QuizletAPI(token.user_id, token.access_token);
-            console.log("userId: " + this.event.session.user.userId);
             LoadSetId(this.event.session.user.userId)
                 .then((data) => {
-                    console.log(JSON.stringify(data));
                     if ((data.Item !== undefined) && (data.Item.Data !== undefined)) {
                         this.handler.state = states.QUERYQUIZLET;
-                        this.emitWithState('QuerySet', data.Item.Data.S);
+                        this.emitWithState('QueryLastSet', data.Item.Data.S);
                     } else {
                         this.handler.state = states.MAINMENU;
                         this.emitWithState('MainMenu', speechOutput);
@@ -256,15 +254,21 @@ var queryQuizletHandlers = Alexa.CreateStateHandler(states.QUERYQUIZLET, {
                 this.emit(":tell", this.t("QUIZLETERROR"));
             });
     },
-    'QuerySet': function (set_id) {
+    'QueryLastSet': function (set_id) {
         quizlet.getSet(set_id)
             .then((data) => {
-                this.attributes['quizlet'] = {};
-                this.attributes['quizlet'].type = dataType.LAST_SET;
-                this.attributes['quizlet'].data = new Array(data);
-                this.attributes['quizlet'].index = 0;
-                this.handler.state = states.QUERYQUIZLET;
-                this.emitWithState('SelectOption');
+                if (data.http_code) {
+                    var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
+                    this.handler.state = states.MAINMENU;
+                    this.emitWithState('MainMenu',speechOutput);
+                } else {
+                    this.attributes['quizlet'] = {};
+                    this.attributes['quizlet'].type = dataType.LAST_SET;
+                    this.attributes['quizlet'].data = new Array(data);
+                    this.attributes['quizlet'].index = 0;
+                    this.handler.state = states.QUERYQUIZLET;
+                    this.emitWithState('SelectOption');
+                }
             })
             .catch((err) => {
                 console.error('error getting set: ' + err);
