@@ -67,4 +67,31 @@ ClassOneIntent class one
 ClassTwoIntent class two
 ClassThreeIntent class three
 ClassFourIntent class four
+ReviewIntent review
+ReviewIntent review it
+ReviewIntent review a set
+ReviewIntent review my set
+ReviewIntent review the set
+QuizMeIntent quiz
+QuizMeIntent quiz me
+QuizMeIntent take quiz
+QuizMeIntent take a quiz
+ToggleFavoriteIntent mark
+ToggleFavoriteIntent mark favorite
+ToggleFavoriteIntent mark as favorite
+ToggleFavoriteIntent mark as favorite set
+ToggleFavoriteIntent mark as a favorite
+ToggleFavoriteIntent mark as a favorite set
+ToggleFavoriteIntent mark set favorite
+ToggleFavoriteIntent mark set as a favorite
+ToggleFavoriteIntent mark set as a favorite set
+ToggleFavoriteIntent unmark
+ToggleFavoriteIntent unmark favorite
+ToggleFavoriteIntent unmark as favorite
+ToggleFavoriteIntent unmark as favorite set
+ToggleFavoriteIntent unmark as a favorite
+ToggleFavoriteIntent unmark as a favorite set
+ToggleFavoriteIntent unmark set favorite
+ToggleFavoriteIntent unmark set as a favorite
+ToggleFavoriteIntent unmark set as a favorite set
 CatchAllIntent {CatchAll}

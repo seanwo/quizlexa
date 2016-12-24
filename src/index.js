@@ -114,7 +114,7 @@ var entryPointHandlers = {
 var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'MainMenu': function (prefix) {
         this.attributes['quizlet'] = undefined;
-        var speechOutput = (prefix || "") + this.t("ASK_ME") + this.t("HOW_CAN_I_HELP");
+        var speechOutput = (prefix || "") + this.t("ASK_ME_MAIN_MENU") + this.t("HOW_CAN_I_HELP");
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
@@ -260,14 +260,15 @@ var queryQuizletHandlers = Alexa.CreateStateHandler(states.QUERYQUIZLET, {
                 if (data.http_code) {
                     var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
                     this.handler.state = states.MAINMENU;
-                    this.emitWithState('MainMenu',speechOutput);
+                    this.emitWithState('MainMenu', speechOutput);
                 } else {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].type = dataType.LAST_SET;
                     this.attributes['quizlet'].data = new Array(data);
                     this.attributes['quizlet'].index = 0;
+                    var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
                     this.handler.state = states.QUERYQUIZLET;
-                    this.emitWithState('SelectOption');
+                    this.emitWithState('SelectOption', speechOutput);
                 }
             })
             .catch((err) => {
@@ -275,11 +276,11 @@ var queryQuizletHandlers = Alexa.CreateStateHandler(states.QUERYQUIZLET, {
                 this.emit(":tell", this.t("QUIZLETERROR"));
             });
     },
-    'SelectOption': function () {
+    'SelectOption': function (prefix) {
         var length = this.attributes['quizlet'].data.length;
         if (length == 1) {
             this.handler.state = states.CONFIRMNAVITEM;
-            this.emitWithState('ConfirmNavItem');
+            this.emitWithState('ConfirmNavItem', prefix);
         } else {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
             this.emitWithState('SelectNavItemFromList');
@@ -288,7 +289,7 @@ var queryQuizletHandlers = Alexa.CreateStateHandler(states.QUERYQUIZLET, {
 });
 
 var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
-    'ConfirmNavItem': function () {
+    'ConfirmNavItem': function (prefix) {
         var type = this.attributes['quizlet'].type;
         switch (type) {
             case dataType.SET:
@@ -300,7 +301,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 break;
             case dataType.LAST_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
-                var speechOutput = this.t("LAST_SET", title) + this.t("ASK_USE_SET");
+                var speechOutput = (prefix || "") + this.t("LAST_SET", title) + this.t("ASK_USE_SET");
                 var repromptSpeech = this.t("ASK_USE_SET_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
@@ -648,14 +649,65 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     },
     'ReturnSetInfo': function () {
         var set = this.attributes['quizlet'].set;
+        var speechOutput = this.t("CHOSEN_SET", set.title) + this.t("SET_HAS_X_TERMS", set.terms.length);
+        this.handler.state = states.SETMENU;
+        this.emitWithState('SetMenu', speechOutput);
+    },
+    'SetMenu': function (prefix) {
+        var set = this.attributes['quizlet'].set;
         var favoriteState;
         if (this.attributes['quizlet'].favorite === true) {
-            favoriteState = "This set is a favorite";
+            favoriteState = this.t("UNMARK_FAVORITE");
         } else {
-            favoriteState = "This set is not a favorite";
+            favoriteState = this.t("MARK_FAVORITE");
         }
-        this.emit(':tell', "You have chosen the set with the name " + set.title + ". It has " + set.terms.length + " terms in this set. " + favoriteState);
+        var speechOutput = (prefix || "") + this.t("ASK_ME_SET_MENU", favoriteState);
+        var repromptSpeech = this.t("ASK_ME_SET_MENU", favoriteState);
+        this.attributes["reprompt"] = repromptSpeech;
+        this.emit(':ask', speechOutput, repromptSpeech);
+    },
+    'ReviewIntent': function () {
+        var speechOutput = "Review Intent. " + this.t("NOTIMPL");
+        this.emit(":tell", speechOutput);
+    },
+    'QuizMeIntent': function () {
+        var speechOutput = "Quiz me intent. " + this.t("NOTIMPL");
+        this.emit(":tell", speechOutput);
+    },
+    'SelectFavoriteSetIntent': function () {
+        this.handler.state = states.SETMENU;
+        this.emitWithState('ToggleFavoriteIntent');
+    },
+    'ToggleFavoriteIntent': function () {
+        var speechOutput = "Favorite intent. " + this.t("NOTIMPL");
+        this.emit(":tell", speechOutput);
+    },
+    'AMAZON.RepeatIntent': function () {
+        this.handler.state = states.SETMENU;
+        this.emitWithState('SetMenu');
+    },
+    'AMAZON.CancelIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StopIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StartOverIntent': function () {
+        this.handler.state = states.MAINMENU;
+        this.emitWithState('MainMenu');
+    },
+    'AMAZON.HelpIntent': function () {
+        var speechOutput = this.attributes["reprompt"];
+        this.emit(':ask', speechOutput, this.t("HELP_ME"));
+    },
+    'Unhandled': function () {
+        var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
+        var repromptSpeech = this.t("HELP_ME");
+        this.emit(':ask', speechOutput, repromptSpeech);
     }
+
 });
 
 function parseToken(access_token) {
@@ -671,7 +723,7 @@ const languageStrings = {
             "SKILL_NAME": "Quizlexa",
             "WELCOME_MESSAGE": "Welcome to %s. ",
             "HOW_CAN_I_HELP": "How can I help you? ",
-            "ASK_ME": "You can ask me to find a favorite set, find a set, or find a class. ",
+            "ASK_ME_MAIN_MENU": "You can ask me to find a favorite set, find a set, or find a class. ",
             "HELP_ME": "For instructions on what you can say, please say help me. ",
             "HELP_MESSAGE": "You can ask me to find a favorite set, find a set, find a class, or you can say exit...Now, %s",
             "STOP_MESSAGE": "Goodbye! ",
@@ -685,7 +737,7 @@ const languageStrings = {
             "ONE_FAVORITE_SET": "You have one favorite set. ",
             "ONE_CLASS_SET": "You have one set in this class. ",
             "ONE_CLASS": "You have one class. ",
-            "LAST_SET": "The last set you used is named %s. ",
+            "LAST_SET": "The last Quizlet set you used is named %s. ",
             "SET": "Set ",
             "CLASS": "Class ",
             "ASK_USE_SET": "Do you want to use this set? ",
@@ -701,11 +753,15 @@ const languageStrings = {
             "SAY_NEXT_MORE_SETS": "Say next for more sets. ",
             "SAY_NEXT_MORE_CLASSES": "Say next for more classes. ",
             "ASK_CHOOSE_REPROMPTB": "Say start over to return to the main menu. Or say help me to hear these options again. ",
-            "SET_NAME_IS": "The set name is %s. ",
+            "SET_NAME_IS": "The Quizlet set name is %s. ",
             "CLASS_NAME_IS": "The class name is %s. ",
+            "ASK_ME_SET_MENU": "You can ask me to review a set, quiz me, %s, or say start over to pick a new set. ",
+            "MARK_FAVORITE": "mark set as favorite",
+            "UNMARK_FAVORITE": "unmark set as favorite",
+            "CHOSEN_SET": "You have chosen the set with the name %s. ",
+            "SET_HAS_X_TERMS": "It has %s terms in this set. ",
             "UNEXPECTED": "An unexpected error has occurred.  Please try again later! ",
             "QUIZLETERROR": "There was an error communicating with Quizlet.  Please try again later! ",
-            "UNDEFINED": "This text is undefined. ",
             "NOTIMPL": "This code path is not yet implemented. ",
             "LINKED": "Your account is linked.  User ID %s.  Access Token <say-as interpret-as=\"characters\">%s</say-as>. "
         }

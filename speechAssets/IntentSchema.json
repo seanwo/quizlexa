@@ -13,6 +13,18 @@
             "slots": []
         },
         {
+            "intent": "ReviewIntent",
+            "slots": []
+        },
+        {
+            "intent": "QuizMeIntent",
+            "slots": []
+        },
+        {
+            "intent": "ToggleFavoriteIntent",
+            "slots": []
+        },
+        {
             "intent": "LinkAccountIntent",
             "slots": []
         },
