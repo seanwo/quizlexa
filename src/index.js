@@ -609,10 +609,8 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
 var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     'SelectSet': function () {
         var set = this.attributes['quizlet'].data[this.attributes['quizlet'].index];
+        this.attributes['quizlet'] = {};
         this.attributes['quizlet'].set = set;
-        this.attributes['quizlet'].data = undefined;
-        this.attributes['quizlet'].index = undefined;
-        this.attributes['quizlet'].type = undefined;
         StoreSetId(this.event.session.user.userId, set.id)
             .then((data) => {
                 this.handler.state = states.SETMENU;
