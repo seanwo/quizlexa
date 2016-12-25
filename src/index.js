@@ -18,7 +18,8 @@ exports.handler = function (event, context, callback) {
         confirmNavItemHandlers,
         selectNavItemFromListHandlers,
         setMenuHandlers,
-        reviewMenuHandlers);
+        reviewMenuHandlers,
+        reviewingHandler);
     alexa.execute();
 };
 
@@ -27,7 +28,8 @@ const states = {
     CONFIRMNAVITEM: '_CONFIRMNAVITEM',
     SELECTNAVITEMFROMLIST: '_SELECTNAVITEMFROMLIST',
     SETMENU: '_SETMENU',
-    REVIEWMENU: '_REVIEWMENU'
+    REVIEWMENU: '_REVIEWMENU',
+    REVIEWING: '_REVIEWING'
 };
 
 const dataType = {
@@ -131,7 +133,7 @@ var entryPointHandlers = {
                 this.emit(":tell", this.t("QUIZLETERROR"));
             });
     }
-}
+};
 
 var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'MainMenu': function (prefix) {
@@ -364,7 +366,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
     'AMAZON.HelpIntent': function () {
         var type = this.attributes['quizlet'].type;
         var speechOutput;
-        if (type === dataType.CLASS_SET) {
+        if (type == dataType.CLASS) {
             speechOutput = this.t("HELP_MESSAGE_USE_CLASS", this.t("HOW_CAN_I_HELP"));
         } else {
             speechOutput = this.t("HELP_MESSAGE_USE_SET", this.t("HOW_CAN_I_HELP"));
@@ -398,7 +400,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             data_type = this.t("CLASS");
             speechOutput = this.t("CHOOSE_CLASS") + "<break time=\"1s\"/>";
             var next = "";
-            if (paginate === true) {
+            if (paginate == true) {
                 next = this.t("SAY_NEXT_MORE_CLASSES")
             }
             repromptSpeech = this.t("CHOOSE_CLASS_REPROMPT", next);
@@ -406,7 +408,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             speechOutput = this.t("CHOOSE_SET") + "<break time=\"1s\"/>";
             data_type = this.t("SET");
             var next = "";
-            if (paginate === true) {
+            if (paginate == true) {
                 next = this.t("SAY_NEXT_MORE_SETS")
             }
             repromptSpeech = this.t("CHOOSE_SET_REPROMPT", next);
@@ -422,7 +424,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             speechOutput += data_type + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + option + "<break time=\"1s\"/>";
         }
 
-        if (paginate === true) {
+        if (paginate == true) {
             if (type == dataType.CLASS) {
                 speechOutput += this.t("SAY_NEXT_MORE_CLASSES");
             } else {
@@ -623,12 +625,16 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
 
         var next = "";
-        if (paginate === true) {
-            next = this.t("SAY_NEXT_MORE_CLASSES")
+        if (paginate == true) {
+            if (type == dataType.CLASS) {
+                next += this.t("SAY_NEXT_MORE_CLASSES");
+            } else {
+                next += this.t("SAY_NEXT_MORE_SETS");
+            }
         }
 
         var speechOutput;
-        if (type === dataType.CLASS) {
+        if (type == dataType.CLASS) {
             speechOutput = this.t("HELP_MESSAGE_CHOOSE_CLASS", next, this.t("HOW_CAN_I_HELP"));
         } else {
             speechOutput = this.t("HELP_MESSAGE_CHOOSE_SET", next, this.t("HOW_CAN_I_HELP"));
@@ -664,7 +670,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             .then((data) => {
                 this.attributes['quizlet'].favorite = false;
                 for (var i = 0; i < data.length; i++) {
-                    if (data[i].id === id) {
+                    if (data[i].id == id) {
                         this.attributes['quizlet'].favorite = true;
                         break;
                     }
@@ -686,7 +692,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     'SetMenu': function (prefix) {
         var set = this.attributes['quizlet'].set;
         var favoriteState;
-        if (this.attributes['quizlet'].favorite === true) {
+        if (this.attributes['quizlet'].favorite == true) {
             favoriteState = this.t("UNMARK_FAVORITE");
         } else {
             favoriteState = this.t("MARK_FAVORITE");
@@ -709,7 +715,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         this.emitWithState('ToggleFavoriteIntent');
     },
     'ToggleFavoriteIntent': function () {
-        if (this.attributes['quizlet'].favorite === true) {
+        if (this.attributes['quizlet'].favorite == true) {
             this.handler.state = states.SETMENU;
             this.emitWithState('UnMarkUserSetFavorite');
         } else {
@@ -735,7 +741,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     },
     'AMAZON.HelpIntent': function () {
         var favoriteState;
-        if (this.attributes['quizlet'].favorite === true) {
+        if (this.attributes['quizlet'].favorite == true) {
             favoriteState = this.t("UNMARK_FAVORITE");
         } else {
             favoriteState = this.t("MARK_FAVORITE");
@@ -780,19 +786,24 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
 
 var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
     'ReviewMenu': function () {
-        // if (this.attributes['quizlet'].shuffled === true) {
-        this.attributes['quizlet'].set.terms.sort(compareRank);
-        // }
+        if (this.attributes['quizlet'].shuffled == true) {
+            this.attributes['quizlet'].set.terms.sort(compareRank);
+            this.attributes['quizlet'].shuffled = false;
+        }
         var speechOutput = this.t("REVIEW_MENU");
         var repromptSpeech = this.t("REVIEW_MENU_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ReviewByTermIntent': function () {
-        this.emit(':tell', "Review by term. " + this.t("NOTIMPL"));
+        this.attributes['quizlet'].reviewByTerm = true;
+        this.handler.state = states.REVIEWING;
+        this.emitWithState('ReviewSet');
     },
     'ReviewByDefinitionIntent': function () {
-        this.emit(':tell', "Review by definition. " + this.t("NOTIMPL"));
+        this.attributes['quizlet'].reviewByTerm = false;
+        this.handler.state = states.REVIEWING;
+        this.emitWithState('ReviewSet');
     },
     'AMAZON.RepeatIntent': function () {
         this.handler.state = states.REVIEWMENU;
@@ -821,6 +832,66 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
     },
 });
 
+var reviewingHandler = Alexa.CreateStateHandler(states.REVIEWING, {
+    'ReviewSet': function () {
+        this.attributes['quizlet'].index = 0;
+        var speechOutput = this.t("LETS_BEGIN") + "<break time=\"1s\"/>";
+        this.handler.state = states.REVIEWING;
+        this.emitWithState('Reviewing', speechOutput);
+    },
+    'Reviewing': function (prefix) {
+        var set = this.attributes['quizlet'].set;
+        var index = this.attributes['quizlet'].index;
+        var speechOutput = (prefix || "");
+        if (this.attributes['quizlet'].reviewByTerm == true) {
+            speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + set.terms[index].term + "<break time=\"1s\"/>";
+            speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + set.terms[index].definition;
+        } else {
+            speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + set.terms[index].definition + "<break time=\"1s\"/>";
+            speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + set.terms[index].term;
+        }
+        var repromptSpeech = this.t("NEXT_TERM");
+        this.attributes["reprompt"] = repromptSpeech;
+        if (index == (set.terms.length - 1)) {
+            speechOutput += "<break time=\"300ms\"/>" + this.t("REVIEW_COMPLETE") + "<break time=\"1s\"/>";
+            this.handler.state = states.SETMENU;
+            this.emitWithState('SetMenu', speechOutput);
+        } else {
+            this.emit(':ask', speechOutput, repromptSpeech);
+        }
+    },
+    'AMAZON.NextIntent': function () {
+        this.attributes['quizlet'].index += 1;
+        this.handler.state = states.REVIEWING;
+        this.emitWithState('Reviewing');
+    },
+    'AMAZON.RepeatIntent': function () {
+        this.handler.state = states.REVIEWING;
+        this.emitWithState('Reviewing');
+    },
+    'AMAZON.CancelIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StopIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StartOverIntent': function () {
+        this.handler.state = states.SETMENU;
+        this.emitWithState('SetMenu');
+    },
+    'AMAZON.HelpIntent': function () {
+        var speechOutput = this.t("HELP_MESSAGE_REVIEWING", this.t("HOW_CAN_I_HELP"));
+        this.emit(':ask', speechOutput, this.t("HELP_ME"));
+    },
+    'Unhandled': function () {
+        var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];
+        var repromptSpeech = this.t("HELP_ME");
+        this.emit(':ask', speechOutput, repromptSpeech);
+    },
+});
+
 function compareRank(a, b) {
     return a.rank - b.rank;
 }
@@ -841,65 +912,55 @@ const languageStrings = {
             "HELP_ME": "For instructions on what you can say, please say help me. ",
             "STOP_MESSAGE": "Goodbye! ",
             "NO_UNDERSTAND": "Sorry, I don't quite understand what you mean. ",
-
             "MAIN_MENU": "You can ask me to find a favorite set, find a set, or find a class. ",
             "MAIN_MENU_REPROMPT": "You can ask me to find a favorite set, find a set, or find a class, or say help me. ",
             "HELP_MESSAGE_MAIN_MENU": "Say find a favorite set to find one of your favorite sets. Say find a set to find one of your sets.  Say find a class to find one of your classes. Say repeat to hear the commands again or you can say exit...Now, %s",
-
             "LINK_ACCOUNT": "Your Quizlet account is not linked.  Please use the Alexa app to link your account. ",
-
             "NO_SETS": "You do not have any sets yet. Go to Quizlet dot com and add some sets to use.  Goodbye! ",
             "NO_FAVORITE_SETS": "You do not have any favorite sets yet. ",
             "NO_CLASS_SETS": "You do not have any sets in this class yet. ",
             "NO_CLASSES": "You have not set up any classes set up yet. ",
-
             "ONE_SET": "You have one set. ",
             "ONE_FAVORITE_SET": "You have one favorite set. ",
             "ONE_CLASS_SET": "You have one set in this class. ",
             "ONE_CLASS": "You have one class. ",
-
-            "LAST_SET": "The last Quizlet set you used is named %s. ",
-
+            "LAST_SET": "The last set you used is named<break time=\"100ms\"/>%s. ",
             "SET": "Set ",
             "CLASS": "Class ",
-
             "USE_SET": "Do you want to use this set? ",
             "USE_SET_REPROMPT": "Say yes to use the set. Say no to find new sets or classes or say help me. ",
-            "HELP_MESSAGE_USE_SET": "Say yes to use the set. Say no to find new sets or classes.  Say repeat to hear the set name again or you can say exit...Now, %s",
-
+            "HELP_MESSAGE_USE_SET": "Say yes to use the set. Say no to find new sets or classes.  Say repeat to hear the set name again or you can say exit. Now, %s",
             "USE_CLASS": "Do you want to use this class? ",
             "USE_CLASS_REPROMPT": "Say yes to use the class. Say no to find new sets or classes or say help me. ",
-            "HELP_MESSAGE_USE_CLASS": "Say yes to use the class. Say no to find new sets or classes.  Say repeat to hear the class name again or you can say exit...Now, %s",
-
+            "HELP_MESSAGE_USE_CLASS": "Say yes to use the class. Say no to find new sets or classes.  Say repeat to hear the class name again or you can say exit. Now, %s",
             "CHOOSE_SET": "Please choose from the following sets. ",
             "CHOOSE_SET_REPROMPT": "Say the number of the set you want. %s or say help me",
             "SAY_NEXT_MORE_SETS": "Say next for more sets. ",
-            "HELP_MESSAGE_CHOOSE_SET": "Say the number of the set you want. %s Say repeat to hear the choices again. Say start over to find new sets or classes or you can say exit...Now, %s",
-
+            "HELP_MESSAGE_CHOOSE_SET": "Say the number of the set you want. %s Say repeat to hear the choices again. Say start over to find new sets or classes or you can say exit. Now, %s",
             "CHOOSE_CLASS": "Please choose from the following classes. ",
             "CHOOSE_CLASS_REPROMPT": "Say the number of the class you want. %s or say help me",
             "SAY_NEXT_MORE_CLASSES": "Say next for more classes. ",
-            "HELP_MESSAGE_CHOOSE_CLASS": "Say the number of the class you want. %s Say repeat to hear the choices again. Say start over to find new sets or classes or you can say exit...Now, %s",
-
-            "SET_NAME_IS": "The Quizlet set name is %s. ",
-            "CLASS_NAME_IS": "The class name is %s. ",
-
-            "CHOSEN_SET": "You have chosen the set named %s. ",
+            "HELP_MESSAGE_CHOOSE_CLASS": "Say the number of the class you want. %s Say repeat to hear the choices again. Say start over to find new sets or classes or you can say exit. Now, %s",
+            "SET_NAME_IS": "The set name is<break time=\"100ms\"/>%s. ",
+            "CLASS_NAME_IS": "The class name is<break time=\"100ms\"/>%s. ",
+            "CHOSEN_SET": "You have chosen the set named<break time=\"100ms\"/>%s. ",
             "SET_HAS_X_TERMS": "This set has %s terms. ",
-
-            "SET_MENU": "You can ask me to review the set, quiz me, or %s.",
+            "SET_MENU": "You can ask me to review the set, take a quiz, or %s.",
             "SET_MENU_REPROMPT": "You can ask me to review the set, quiz me, %s, or say help me. ",
-            "HELP_MESSAGE_SET_MENU": "Say review the set to review terms and definitions. Say quiz me to take a quiz. Say %s to %s. Say repeat to hear the commands again. Say start over to find new sets or classes or you can say exit...Now, %s",
-
+            "HELP_MESSAGE_SET_MENU": "Say review the set to review terms and definitions. Say quiz me to take a quiz. Say %s to %s. Say repeat to hear the commands again. Say start over to find new sets or classes or you can say exit. Now, %s",
             "MARK_FAVORITE": "mark the set as a favorite",
             "UNMARK_FAVORITE": "unmark the set as a favorite",
             "MARKED_FAVORITE": "Great! I have marked this set as a favorite. ",
             "UNMARKED_FAVORITE": "I have unmarked this set as a favorite. ",
-
             "REVIEW_MENU": "You can ask me to review by term or review by definition. ",
             "REVIEW_MENU_REPROMPT": "You can ask me to review by term, review by definition, or say help me. ",
             "HELP_MESSAGE_REVIEW_MENU": "Say review by term to review the set starting with the term. Say review by definition to review the set starting with the definition. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
-
+            "LETS_BEGIN": "Let's begin. ",
+            "TERM": "Term ",
+            "DEFINITION": "Definition ",
+            "REVIEW_COMPLETE": "Review Complete. ",
+            "NEXT_TERM": "Say next for the next term. ",
+            "HELP_MESSAGE_REVIEWING": "Say nex for the next term.  Say repeat to hear the term again.  Say start over to do other things with this set or you can say exit. Now, %s",
             "UNEXPECTED": "An unexpected error has occurred.  Please try again later! ",
             "QUIZLETERROR": "There was an error communicating with Quizlet.  Please try again later! ",
             "NOTIMPL": "This code path is not yet implemented. ",
