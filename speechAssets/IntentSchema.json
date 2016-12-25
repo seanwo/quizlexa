@@ -25,6 +25,14 @@
             "slots": []
         },
         {
+            "intent": "ReviewByTermIntent",
+            "slots": []
+        },
+        {
+            "intent": "ReviewByDefinitionIntent",
+            "slots": []
+        },
+        {
             "intent": "LinkAccountIntent",
             "slots": []
         },

@@ -72,8 +72,11 @@ ReviewIntent review it
 ReviewIntent review a set
 ReviewIntent review my set
 ReviewIntent review the set
+ReviewIntent review this set
 QuizMeIntent quiz
 QuizMeIntent quiz me
+QuizMeIntent quiz me on the set
+QuizMeIntent quiz me on this set
 QuizMeIntent take quiz
 QuizMeIntent take a quiz
 ToggleFavoriteIntent mark
@@ -83,8 +86,14 @@ ToggleFavoriteIntent mark as favorite set
 ToggleFavoriteIntent mark as a favorite
 ToggleFavoriteIntent mark as a favorite set
 ToggleFavoriteIntent mark set favorite
+ToggleFavoriteIntent mark the set favorite
+ToggleFavoriteIntent mark this set favorite
 ToggleFavoriteIntent mark set as a favorite
+ToggleFavoriteIntent mark the set as a favorite
+ToggleFavoriteIntent mark this set as a favorite
 ToggleFavoriteIntent mark set as a favorite set
+ToggleFavoriteIntent mark the set as a favorite set
+ToggleFavoriteIntent mark this set as a favorite set
 ToggleFavoriteIntent unmark
 ToggleFavoriteIntent unmark favorite
 ToggleFavoriteIntent unmark as favorite
@@ -92,6 +101,60 @@ ToggleFavoriteIntent unmark as favorite set
 ToggleFavoriteIntent unmark as a favorite
 ToggleFavoriteIntent unmark as a favorite set
 ToggleFavoriteIntent unmark set favorite
+ToggleFavoriteIntent unmark the set favorite
+ToggleFavoriteIntent unmark this set favorite
 ToggleFavoriteIntent unmark set as a favorite
+ToggleFavoriteIntent unmark the set as a favorite
+ToggleFavoriteIntent unmark this set as a favorite
 ToggleFavoriteIntent unmark set as a favorite set
+ToggleFavoriteIntent unmark the set as a favorite set
+ToggleFavoriteIntent unmark this set as a favorite set
+ToggleFavoriteIntent remove
+ToggleFavoriteIntent remove favorite
+ToggleFavoriteIntent remove as favorite
+ToggleFavoriteIntent remove as favorite set
+ToggleFavoriteIntent remove as a favorite
+ToggleFavoriteIntent remove as a favorite set
+ToggleFavoriteIntent remove set favorite
+ToggleFavoriteIntent remove the set favorite
+ToggleFavoriteIntent remove this set favorite
+ToggleFavoriteIntent remove set as a favorite
+ToggleFavoriteIntent remove the set as a favorite
+ToggleFavoriteIntent remove this set as a favorite
+ToggleFavoriteIntent remove set as a favorite set
+ToggleFavoriteIntent remove the set as a favorite set
+ToggleFavoriteIntent remove this set as a favorite set
+ToggleFavoriteIntent add
+ToggleFavoriteIntent add favorite
+ToggleFavoriteIntent add as favorite
+ToggleFavoriteIntent add as favorite set
+ToggleFavoriteIntent add as a favorite
+ToggleFavoriteIntent add as a favorite set
+ToggleFavoriteIntent add set favorite
+ToggleFavoriteIntent add the set favorite
+ToggleFavoriteIntent add this set favorite
+ToggleFavoriteIntent add set as a favorite
+ToggleFavoriteIntent add the set as a favorite
+ToggleFavoriteIntent add this set as a favorite
+ToggleFavoriteIntent add set as a favorite set
+ToggleFavoriteIntent add the set as a favorite set
+ToggleFavoriteIntent add this set as a favorite set
+ReviewByTermIntent term
+ReviewByTermIntent terms
+ReviewByTermIntent the terms
+ReviewByTermIntent by term
+ReviewByTermIntent by terms
+ReviewByTermIntent by the terms
+ReviewByTermIntent review by term
+ReviewByTermIntent review by terms
+ReviewByTermIntent review by the terms
+ReviewByDefinitionIntent definition
+ReviewByDefinitionIntent definitions
+ReviewByDefinitionIntent the definitions
+ReviewByDefinitionIntent by definition
+ReviewByDefinitionIntent by definitions
+ReviewByDefinitionIntent by the definitions
+ReviewByDefinitionIntent review by definition
+ReviewByDefinitionIntent review by definitions
+ReviewByDefinitionIntent review by the definitions
 CatchAllIntent {CatchAll}
