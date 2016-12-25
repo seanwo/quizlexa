@@ -293,30 +293,35 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = this.t("ONE_SET") + this.t("SET_NAME_IS", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             case dataType.LAST_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = (prefix || "") + this.t("LAST_SET", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             case dataType.FAVORITE_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = this.t("ONE_FAVORITE_SET") + this.t("SET_NAME_IS", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             case dataType.CLASS_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 var speechOutput = this.t("ONE_CLASS_SET") + this.t("SET_NAME_IS", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             case dataType.CLASS:
                 var name = this.attributes['quizlet'].data[this.attributes['quizlet'].index].name;
                 var speechOutput = this.t("ONE_CLASS") + this.t("CLASS_NAME_IS", name) + this.t("USE_CLASS");
                 var repromptSpeech = this.t("USE_CLASS_REPROMPT");
+                this.attributes["reprompt"] = repromptSpeech;
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             default:
@@ -424,7 +429,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
                 speechOutput += this.t("SAY_NEXT_MORE_SETS");
             }
         }
-
+        this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'SetOneIntent': function () {
@@ -780,6 +785,7 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
         // }
         var speechOutput = this.t("REVIEW_MENU");
         var repromptSpeech = this.t("REVIEW_MENU_REPROMPT");
+        this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ReviewByTermIntent': function () {
