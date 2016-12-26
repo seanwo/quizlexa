@@ -67,6 +67,9 @@ ClassOneIntent class one
 ClassTwoIntent class two
 ClassThreeIntent class three
 ClassFourIntent class four
+TermOneIntent term one
+TermTwoIntent term two
+TermThreeIntent term three
 ReviewIntent review
 ReviewIntent review it
 ReviewIntent review a set
@@ -157,4 +160,34 @@ ReviewByDefinitionIntent by the definitions
 ReviewByDefinitionIntent review by definition
 ReviewByDefinitionIntent review by definitions
 ReviewByDefinitionIntent review by the definitions
+MatchingQuizIntent matching
+MatchingQuizIntent matching quiz
+MatchingQuizIntent the matching quiz
+MatchingQuizIntent take matching quiz
+MatchingQuizIntent take a matching quiz
+MatchingQuizIntent take the matching quiz
+MatchingQuizIntent give me matching quiz
+MatchingQuizIntent give me a matching quiz
+MatchingQuizIntent give me the matching quiz
+MatchingQuizIntent quiz me by matching
+MeaningsQuizIntent meaning
+MeaningsQuizIntent meanings
+MeaningsQuizIntent meaning quiz
+MeaningsQuizIntent meanings quiz
+MeaningsQuizIntent the meaning quiz
+MeaningsQuizIntent the meanings quiz
+MeaningsQuizIntent take meaning quiz
+MeaningsQuizIntent take meanings quiz
+MeaningsQuizIntent take a meaning quiz
+MeaningsQuizIntent take a meanings quiz
+MeaningsQuizIntent take the meaning quiz
+MeaningsQuizIntent take the meanings quiz
+MeaningsQuizIntent give me meaning quiz
+MeaningsQuizIntent give me meanings quiz
+MeaningsQuizIntent give me a meaning quiz
+MeaningsQuizIntent give me a meanings quiz
+MeaningsQuizIntent give me the meaning quiz
+MeaningsQuizIntent give me the meanings quiz
+MeaningsQuizIntent quiz me by meaning
+MeaningsQuizIntent quiz me by meanings
 CatchAllIntent {CatchAll}

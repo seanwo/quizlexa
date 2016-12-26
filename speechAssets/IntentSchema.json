@@ -85,6 +85,26 @@
             "slots": []
         },
         {
+            "intent": "MatchingQuizIntent",
+            "slots": []
+        },
+        {
+            "intent": "MeaningsQuizIntent",
+            "slots": []
+        },
+        {
+            "intent": "TermOneIntent",
+            "slots": []
+        },
+        {
+            "intent": "TermTwoIntent",
+            "slots": []
+        },
+        {
+            "intent": "TermThreeIntent",
+            "slots": []
+        },
+        {
             "intent": "AMAZON.YesIntent",
             "slots": []
         },
