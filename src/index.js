@@ -140,6 +140,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         this.attributes['quizlet'] = undefined;
         var speechOutput = (prefix || "") + this.t("MAIN_MENU") + this.t("HOW_CAN_I_HELP");
         var repromptSpeech = this.t("MAIN_MENU_REPROMPT");
+        this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'SelectFavoriteSetIntent': function () {
@@ -187,7 +188,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         this.emit(':ask', speechOutput, speechOutput);
     },
     'Unhandled': function () {
-        var speechOutput = this.t("NO_UNDERSTAND");
+        var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
@@ -853,7 +854,7 @@ var reviewingHandler = Alexa.CreateStateHandler(states.REVIEWING, {
         var repromptSpeech = this.t("NEXT_TERM");
         this.attributes["reprompt"] = repromptSpeech;
         if (index == (set.terms.length - 1)) {
-            speechOutput += "<break time=\"300ms\"/>" + this.t("REVIEW_COMPLETE") + "<break time=\"1s\"/>";
+            speechOutput += "<break time=\"500ms\"/>" + this.t("REVIEW_COMPLETE") + "<break time=\"1s\"/>";
             this.handler.state = states.SETMENU;
             this.emitWithState('SetMenu', speechOutput);
         } else {
@@ -955,7 +956,7 @@ const languageStrings = {
             "REVIEW_MENU": "You can ask me to review by term or review by definition. ",
             "REVIEW_MENU_REPROMPT": "You can ask me to review by term, review by definition, or say help me. ",
             "HELP_MESSAGE_REVIEW_MENU": "Say review by term to review the set starting with the term. Say review by definition to review the set starting with the definition. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
-            "LETS_BEGIN": "Let's begin. ",
+            "LETS_BEGIN": "Let's begin. Say next after each term. ",
             "TERM": "Term ",
             "DEFINITION": "Definition ",
             "REVIEW_COMPLETE": "Review Complete. ",
