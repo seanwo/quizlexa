@@ -6,6 +6,8 @@ var APP_ID = undefined; // TODO replace with your app ID (OPTIONAL).
 const AWS = require('aws-sdk');
 var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' })
 
+const shuffle = require('shuffle-array');
+
 const QuizletAPI = require('quizlet-api').QuizletAPI;
 var quizlet;
 
@@ -20,7 +22,8 @@ exports.handler = function (event, context, callback) {
         setMenuHandlers,
         reviewMenuHandlers,
         reviewingHandler,
-        quizMenuHandlers);
+        quizMenuHandlers,
+        meaningsQuiz);
     alexa.execute();
 };
 
@@ -31,7 +34,8 @@ const states = {
     SETMENU: '_SETMENU',
     REVIEWMENU: '_REVIEWMENU',
     REVIEWING: '_REVIEWING',
-    QUIZMENU: '_QUIZMENU'
+    QUIZMENU: '_QUIZMENU',
+    MEANINGSQUIZ: '_MEANINGSQUIZ'
 };
 
 const dataType = {
@@ -43,6 +47,7 @@ const dataType = {
 };
 
 const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_QUIZ = 5;
 
 function StoreSetId(userId, id) {
     return new Promise(
@@ -636,13 +641,13 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             }
         }
 
-        var speechOutput;
         if (type == dataType.CLASS) {
-            speechOutput = this.t("HELP_MESSAGE_CHOOSE_CLASS", next, this.t("HOW_CAN_I_HELP"));
+            var speechOutput = this.t("HELP_MESSAGE_CHOOSE_CLASS", next, this.t("HOW_CAN_I_HELP"));
+            this.emit(':ask', speechOutput, this.t("HELP_ME"));
         } else {
-            speechOutput = this.t("HELP_MESSAGE_CHOOSE_SET", next, this.t("HOW_CAN_I_HELP"));
+            var speechOutput = this.t("HELP_MESSAGE_CHOOSE_SET", next, this.t("HOW_CAN_I_HELP"));
+            this.emit(':ask', speechOutput, this.t("HELP_ME"));
         }
-        this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
@@ -656,7 +661,6 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var set = this.attributes['quizlet'].data[this.attributes['quizlet'].index];
         this.attributes['quizlet'] = {};
         this.attributes['quizlet'].set = set;
-        this.attributes['quizlet'].shuffled = false;
         StoreSetId(this.event.session.user.userId, set.id)
             .then((data) => {
                 this.handler.state = states.SETMENU;
@@ -795,19 +799,11 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ReviewByTermIntent': function () {
-        if (this.attributes['quizlet'].shuffled == true) {
-            this.attributes['quizlet'].set.terms.sort(compareRank);
-            this.attributes['quizlet'].shuffled = false;
-        }
         this.attributes['quizlet'].reviewByTerm = true;
         this.handler.state = states.REVIEWING;
         this.emitWithState('ReviewSet');
     },
     'ReviewByDefinitionIntent': function () {
-        if (this.attributes['quizlet'].shuffled == true) {
-            this.attributes['quizlet'].set.terms.sort(compareRank);
-            this.attributes['quizlet'].shuffled = false;
-        }
         this.attributes['quizlet'].reviewByTerm = false;
         this.handler.state = states.REVIEWING;
         this.emitWithState('ReviewSet');
@@ -842,7 +838,7 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
 var reviewingHandler = Alexa.CreateStateHandler(states.REVIEWING, {
     'ReviewSet': function () {
         this.attributes['quizlet'].index = 0;
-        var speechOutput = this.t("LETS_BEGIN") + "<break time=\"1s\"/>";
+        var speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH") + "<break time=\"1s\"/>";
         this.handler.state = states.REVIEWING;
         this.emitWithState('Reviewing', speechOutput);
     },
@@ -907,14 +903,16 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'MatchingQuizIntent': function () {
-        //shuffle the set
-        this.attributes['quizlet'].shuffled = true;
         this.emit(':tell', "Matching Quiz Intent. " + this.t("NOTIMPL"));
     },
     'MeaningsQuizIntent': function () {
-        //shuffle the set
-        this.attributes['quizlet'].shuffled = true;
-        this.emit(':tell', "Meanings Quiz Intent. " + this.t("NOTIMPL"));
+        var set = this.attributes['quizlet'].set;
+        this.attributes['quizlet'].quiz_terms = shuffle.pick(set.terms, { 'picks': Math.min(ITEMS_PER_QUIZ, set.terms.length) });
+        this.attributes['quizlet'].correct = 0;
+        this.attributes['quizlet'].index = 0;
+        var speechOutput = this.t("LETS_BEGIN") + "<break time=\"1s\"/>";
+        this.handler.state = states.MEANINGSQUIZ;
+        this.emitWithState('GenerateQuestion', speechOutput);
     },
     'AMAZON.RepeatIntent': function () {
         this.handler.state = states.QUIZMENU;
@@ -943,8 +941,97 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
     },
 });
 
-function compareRank(a, b) {
-    return a.rank - b.rank;
+var meaningsQuiz = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
+    'GenerateQuestion': function (prefix) {
+        if (this.attributes['quizlet'].index == this.attributes['quizlet'].quiz_terms.length) {
+            var correct = this.attributes['quizlet'].correct;
+            var questions = this.attributes['quizlet'].quiz_terms.length;
+            var praise = "";
+            console.log("percentage: " + (correct / questions));
+            if ((correct / questions) == 1) {
+                praise = this.t("GREAT_WORK");
+            } else if ((correct / questions) > 0.70) {
+                praise = this.t("GOOD_JOB");
+            }
+            var speechOutput = (prefix || "") + this.t("QUIZ_COMPLETE") + this.t("NUMBER_OF_QUESTIONS_CORRECT", correct, questions) + praise;
+            this.handler.state = states.SETMENU;
+            this.emitWithState('SetMenu', speechOutput);
+        } else {
+            this.attributes['quizlet'].correct_answer = shuffle.pick([true, false]);
+            if (this.attributes['quizlet'].correct_answer == true) {
+                this.attributes['quizlet'].choice_index = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].rank;
+            } else {
+                var random;
+                do {
+                    random = getRandomNumber(0, this.attributes['quizlet'].set.terms.length - 1);
+                } while (random == this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].rank);
+                this.attributes['quizlet'].choice_index = random;
+            }
+            this.handler.state = states.MEANINGSQUIZ;
+            this.emitWithState('AskQuestion', prefix);
+        }
+    },
+    'AskQuestion': function (prefix) {
+        var term = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].term;
+        var definition = this.attributes['quizlet'].set.terms[this.attributes['quizlet'].choice_index].definition;
+        var speechOutput = (prefix || "") + "Does the term " + term + " mean " + definition;
+        var repromptSpeech = this.t("MEANINGS_QUIZ_REPROMPT");
+        this.attributes["reprompt"] = repromptSpeech;
+        this.emit(":ask", speechOutput, repromptSpeech);
+    },
+    'AMAZON.YesIntent': function () {
+        var speechOutput;
+        if (this.attributes['quizlet'].correct_answer == true) {
+            var speechOutput = this.t("CORRECT");
+            this.attributes['quizlet'].correct += 1;
+        } else {
+            var speechOutput = this.t("INCORRECT");
+        }
+        this.attributes['quizlet'].index += 1;
+        this.handler.state = states.MEANINGSQUIZ;
+        this.emitWithState('GenerateQuestion', speechOutput);
+    },
+    'AMAZON.NoIntent': function () {
+        var speechOutput;
+        if (this.attributes['quizlet'].correct_answer == false) {
+            var speechOutput = this.t("CORRECT");
+            this.attributes['quizlet'].correct += 1;
+        } else {
+            var speechOutput = this.t("INCORRECT");
+        }
+        this.attributes['quizlet'].index += 1;
+        this.handler.state = states.MEANINGSQUIZ;
+        this.emitWithState('GenerateQuestion', speechOutput);
+    },
+    'AMAZON.RepeatIntent': function () {
+        this.handler.state = states.MEANINGSQUIZ;
+        this.emitWithState('AskQuestion');
+    },
+    'AMAZON.CancelIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StopIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StartOverIntent': function () {
+        this.handler.state = states.SETMENU;
+        this.emitWithState('SetMenu');
+    },
+    'AMAZON.HelpIntent': function () {
+        var speechOutput = this.t("HELP_MEANINGS_QUIZ_MENU", this.t("HOW_CAN_I_HELP"));
+        this.emit(':ask', speechOutput, this.t("HELP_ME"));
+    },
+    'Unhandled': function () {
+        var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
+        var repromptSpeech = this.t("HELP_ME");
+        this.emit(':ask', speechOutput, repromptSpeech);
+    }
+});
+
+function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function parseToken(access_token) {
@@ -1006,7 +1093,8 @@ const languageStrings = {
             "REVIEW_MENU": "You can ask me to review by term or review by definition. ",
             "REVIEW_MENU_REPROMPT": "You can ask me to review by term, review by definition, or say help me. ",
             "HELP_MESSAGE_REVIEW_MENU": "Say review by term to review the set starting with the term. Say review by definition to review the set starting with the definition. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
-            "LETS_BEGIN": "Let's begin. Say next after each term. ",
+            "LETS_BEGIN": "Let's begin. ",
+            "NEXT_AFTER_EACH": "Say next after each term. ",
             "TERM": "Term ",
             "DEFINITION": "Definition ",
             "REVIEW_COMPLETE": "Review Complete. ",
@@ -1015,6 +1103,14 @@ const languageStrings = {
             "QUIZ_MENU": "You can ask me to take a matching quiz or take a meanings quiz. ",
             "QUIZ_MENU_REPROMPT": "You can ask me to take a matching quiz or take a meanings quiz, or say help me. ",
             "HELP_MESSAGE_QUIZ_MENU": "Say take a matching quiz to take a matching quiz. Say take a meanings quiz to take a meanings quiz. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
+            "QUIZ_COMPLETE": "Quiz Complete. ",
+            "CORRECT": "Correct! ",
+            "INCORRECT": "Sorry, that is incorrect. ",
+            "MEANINGS_QUIZ_REPROMPT": "Say yes if you believe the statement is true.  Say no if you believe the statement is false or say help me. ",
+            "HELP_MEANINGS_QUIZ_MENU": "Say yes if you believe the statement is true.  Say no if you believe the statement is false.  Say repeat to hear the question again.  Say start over to do other things with this set or you can say exit...Now, %s",
+            "NUMBER_OF_QUESTIONS_CORRECT": "You got %s questions out of %s correct. ",
+            "GREAT_WORK": "Great work! ",
+            "GOOD_JOB": "Good job. ",
             "UNEXPECTED": "An unexpected error has occurred.  Please try again later! ",
             "QUIZLETERROR": "There was an error communicating with Quizlet.  Please try again later! ",
             "NOTIMPL": "This code path is not yet implemented. ",

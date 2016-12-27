@@ -11,6 +11,7 @@
   "dependencies": {
     "alexa-sdk": "^1.0.6",
     "aws-sdk": "^2.7.19",
-    "quizlet-api": "file:quizlet-api-1.0.0.tgz"
+    "quizlet-api": "file:quizlet-api-1.0.0.tgz",
+    "shuffle-array": "^1.0.0"
   }
 }
