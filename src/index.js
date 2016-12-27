@@ -23,7 +23,7 @@ exports.handler = function (event, context, callback) {
         reviewMenuHandlers,
         reviewingHandlers,
         quizMenuHandlers,
-        meaningsQuizHandlers);
+        termsQuizHandlers);
     alexa.execute();
 };
 
@@ -35,7 +35,7 @@ const states = {
     REVIEWMENU: '_REVIEWMENU',
     REVIEWING: '_REVIEWING',
     QUIZMENU: '_QUIZMENU',
-    MEANINGSQUIZ: '_MEANINGSQUIZ'
+    TERMSQUIZ: '_TERMSQUIZ'
 };
 
 const dataType = {
@@ -788,11 +788,19 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ReviewByTermIntent': function () {
+        this.handler.state = states.REVIEWING;
+        this.emitWithState('ByTermIntent');
+    },
+    'ReviewByDefinitionIntent': function () {
+        this.handler.state = states.REVIEWING;
+        this.emitWithState('ByDefinitionIntent');
+    },
+    'ByTermIntent': function () {
         this.attributes['quizlet'].reviewByTerm = true;
         this.handler.state = states.REVIEWING;
         this.emitWithState('ReviewSet');
     },
-    'ReviewByDefinitionIntent': function () {
+    'ByDefinitionIntent': function () {
         this.attributes['quizlet'].reviewByTerm = false;
         this.handler.state = states.REVIEWING;
         this.emitWithState('ReviewSet');
@@ -891,16 +899,25 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
         this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
-    'MatchingQuizIntent': function () {
-        this.emit(':tell', "Matching Quiz Intent. " + this.t("NOTIMPL"));
+    'ByDefinitionIntent': function () {
+        this.handler.state = states.QUIZMENU;
+        this.emitWithState('DefinitionsQuizIntent');
     },
-    'MeaningsQuizIntent': function () {
+    'DefinitionsQuizIntent': function () {
+        this.emit(':tell', "Definition Quiz Intent. " + this.t("NOTIMPL"));
+    },
+    'ByTermIntent': function () {
+        this.handler.state = states.QUIZMENU;
+        this.emitWithState('TermsQuizIntent');
+    },
+    'TermsQuizIntent': function () {
         var set = this.attributes['quizlet'].set;
         this.attributes['quizlet'].quiz_terms = shuffle.pick(set.terms, { 'picks': Math.min(ITEMS_PER_QUIZ, set.terms.length) });
         this.attributes['quizlet'].correct = 0;
         this.attributes['quizlet'].index = 0;
-        var speechOutput = this.t("LETS_BEGIN") + "<break time=\"1s\"/>";
-        this.handler.state = states.MEANINGSQUIZ;
+        var questions = this.attributes['quizlet'].quiz_terms.length;
+        var speechOutput = this.t("LETS_BEGIN") + this.t("THERE_WILL_BE_X_QUESTIONS", questions) + "<break time=\"1s\"/>";
+        this.handler.state = states.TERMSQUIZ;
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'AMAZON.RepeatIntent': function () {
@@ -930,7 +947,7 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
     },
 });
 
-var meaningsQuizHandlers = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
+var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
     'GenerateQuestion': function (prefix) {
         if (this.attributes['quizlet'].index == this.attributes['quizlet'].quiz_terms.length) {
             var correct = this.attributes['quizlet'].correct;
@@ -955,7 +972,7 @@ var meaningsQuizHandlers = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
                 } while (random == this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].rank);
                 this.attributes['quizlet'].choice_index = random;
             }
-            this.handler.state = states.MEANINGSQUIZ;
+            this.handler.state = states.TERMSQUIZ;
             this.emitWithState('AskQuestion', prefix);
         }
     },
@@ -963,7 +980,7 @@ var meaningsQuizHandlers = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
         var term = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].term;
         var definition = this.attributes['quizlet'].set.terms[this.attributes['quizlet'].choice_index].definition;
         var speechOutput = (prefix || "") + this.t("DOES_TERM_MEAN_DEFINITION", term, definition);
-        var repromptSpeech = this.t("MEANINGS_QUIZ_REPROMPT");
+        var repromptSpeech = this.t("TERMS_QUIZ_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
@@ -976,7 +993,7 @@ var meaningsQuizHandlers = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
             var speechOutput = this.t("INCORRECT");
         }
         this.attributes['quizlet'].index += 1;
-        this.handler.state = states.MEANINGSQUIZ;
+        this.handler.state = states.TERMSQUIZ;
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'AMAZON.NoIntent': function () {
@@ -988,11 +1005,11 @@ var meaningsQuizHandlers = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
             var speechOutput = this.t("INCORRECT");
         }
         this.attributes['quizlet'].index += 1;
-        this.handler.state = states.MEANINGSQUIZ;
+        this.handler.state = states.TERMSQUIZ;
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'AMAZON.RepeatIntent': function () {
-        this.handler.state = states.MEANINGSQUIZ;
+        this.handler.state = states.TERMSQUIZ;
         this.emitWithState('AskQuestion');
     },
     'AMAZON.CancelIntent': function () {
@@ -1008,7 +1025,7 @@ var meaningsQuizHandlers = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
         this.emitWithState('SetMenu');
     },
     'AMAZON.HelpIntent': function () {
-        var speechOutput = this.t("HELP_MEANINGS_QUIZ_MENU", this.t("HOW_CAN_I_HELP"));
+        var speechOutput = this.t("HELP_TERMS_QUIZ_MENU", this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
@@ -1082,21 +1099,22 @@ const languageStrings = {
             "REVIEW_MENU_REPROMPT": "You can ask me to review by term, review by definition, or say help me. ",
             "HELP_MESSAGE_REVIEW_MENU": "Say review by term to review the set starting with the term. Say review by definition to review the set starting with the definition. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
             "LETS_BEGIN": "Let's begin. ",
+            "THERE_WILL_BE_X_QUESTIONS": "There will be %s questions. ",
             "NEXT_AFTER_EACH": "Say next after each term. ",
             "TERM": "Term ",
             "DEFINITION": "Definition ",
             "REVIEW_COMPLETE": "Review Complete. ",
             "NEXT_TERM": "Say next for the next term. ",
             "HELP_MESSAGE_REVIEWING": "Say nex for the next term.  Say repeat to hear the term again.  Say start over to do other things with this set or you can say exit. Now, %s",
-            "QUIZ_MENU": "You can ask me to take a matching quiz or take a meanings quiz. ",
-            "QUIZ_MENU_REPROMPT": "You can ask me to take a matching quiz or take a meanings quiz, or say help me. ",
-            "HELP_MESSAGE_QUIZ_MENU": "Say take a matching quiz to take a matching quiz. Say take a meanings quiz to take a meanings quiz. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
+            "QUIZ_MENU": "You can ask me to take a terms quiz or take a definitions quiz. ",
+            "QUIZ_MENU_REPROMPT": "You can ask me to take a terms quiz or take a definitions quiz, or say help me. ",
+            "HELP_MESSAGE_QUIZ_MENU": "Say take a terms quiz to take a terms quiz. Say take a definitions quiz to take a definitions quiz. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
             "DOES_TERM_MEAN_DEFINITION": "Does the term %s mean %s? ",
             "QUIZ_COMPLETE": "Quiz Complete. ",
             "CORRECT": "Correct! ",
             "INCORRECT": "Sorry, that is incorrect. ",
-            "MEANINGS_QUIZ_REPROMPT": "Say yes if you believe the statement is true.  Say no if you believe the statement is false or say help me. ",
-            "HELP_MEANINGS_QUIZ_MENU": "Say yes if you believe the statement is true.  Say no if you believe the statement is false.  Say repeat to hear the question again.  Say start over to do other things with this set or you can say exit...Now, %s",
+            "TERMS_QUIZ_REPROMPT": "Say yes if you believe the statement is true.  Say no if you believe the statement is false or say help me. ",
+            "HELP_TERMS_QUIZ_MENU": "Say yes if you believe the statement is true.  Say no if you believe the statement is false.  Say repeat to hear the question again.  Say start over to do other things with this set or you can say exit...Now, %s",
             "NUMBER_OF_QUESTIONS_CORRECT": "You got %s questions out of %s correct. ",
             "GREAT_WORK": "Great work! ",
             "GOOD_JOB": "Good job. ",

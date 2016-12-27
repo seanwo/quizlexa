@@ -142,52 +142,56 @@ ToggleFavoriteIntent add this set as a favorite
 ToggleFavoriteIntent add set as a favorite set
 ToggleFavoriteIntent add the set as a favorite set
 ToggleFavoriteIntent add this set as a favorite set
-ReviewByTermIntent term
-ReviewByTermIntent terms
-ReviewByTermIntent the terms
-ReviewByTermIntent by term
-ReviewByTermIntent by terms
-ReviewByTermIntent by the terms
+ByTermIntent term
+ByTermIntent terms
+ByTermIntent the terms
+ByTermIntent by term
+ByTermIntent by terms
+ByTermIntent by the terms
 ReviewByTermIntent review by term
 ReviewByTermIntent review by terms
 ReviewByTermIntent review by the terms
-ReviewByDefinitionIntent definition
-ReviewByDefinitionIntent definitions
-ReviewByDefinitionIntent the definitions
-ReviewByDefinitionIntent by definition
-ReviewByDefinitionIntent by definitions
-ReviewByDefinitionIntent by the definitions
+ByDefinitionIntent definition
+ByDefinitionIntent definitions
+ByDefinitionIntent the definitions
+ByDefinitionIntent by definition
+ByDefinitionIntent by definitions
+ByDefinitionIntent by the definitions
 ReviewByDefinitionIntent review by definition
 ReviewByDefinitionIntent review by definitions
 ReviewByDefinitionIntent review by the definitions
-MatchingQuizIntent matching
-MatchingQuizIntent matching quiz
-MatchingQuizIntent the matching quiz
-MatchingQuizIntent take matching quiz
-MatchingQuizIntent take a matching quiz
-MatchingQuizIntent take the matching quiz
-MatchingQuizIntent give me matching quiz
-MatchingQuizIntent give me a matching quiz
-MatchingQuizIntent give me the matching quiz
-MatchingQuizIntent quiz me by matching
-MeaningsQuizIntent meaning
-MeaningsQuizIntent meanings
-MeaningsQuizIntent meaning quiz
-MeaningsQuizIntent meanings quiz
-MeaningsQuizIntent the meaning quiz
-MeaningsQuizIntent the meanings quiz
-MeaningsQuizIntent take meaning quiz
-MeaningsQuizIntent take meanings quiz
-MeaningsQuizIntent take a meaning quiz
-MeaningsQuizIntent take a meanings quiz
-MeaningsQuizIntent take the meaning quiz
-MeaningsQuizIntent take the meanings quiz
-MeaningsQuizIntent give me meaning quiz
-MeaningsQuizIntent give me meanings quiz
-MeaningsQuizIntent give me a meaning quiz
-MeaningsQuizIntent give me a meanings quiz
-MeaningsQuizIntent give me the meaning quiz
-MeaningsQuizIntent give me the meanings quiz
-MeaningsQuizIntent quiz me by meaning
-MeaningsQuizIntent quiz me by meanings
+TermsQuizIntent quiz by term
+TermsQuizIntent quiz by terms
+TermsQuizIntent quiz by the terms
+TermsQuizIntent take term quiz
+TermsQuizIntent take terms quiz
+TermsQuizIntent take a term quiz
+TermsQuizIntent take a terms quiz
+TermsQuizIntent take the term quiz
+TermsQuizIntent take the terms quiz
+TermsQuizIntent give me term quiz
+TermsQuizIntent give me terms quiz
+TermsQuizIntent give me a term quiz
+TermsQuizIntent give me a terms quiz
+TermsQuizIntent give me the term quiz
+TermsQuizIntent give me the terms quiz
+TermsQuizIntent quiz me by term
+TermsQuizIntent quiz me by terms
+DefinitionsQuizIntent quiz by defintion
+DefinitionsQuizIntent quiz by definitions
+DefinitionsQuizIntent quiz by the definitions
+DefinitionsQuizIntent take defintion quiz
+DefinitionsQuizIntent take definitions quiz
+DefinitionsQuizIntent take a defintion quiz
+DefinitionsQuizIntent take a definitions quiz
+DefinitionsQuizIntent take the defintion quiz
+DefinitionsQuizIntent take the definitions quiz
+DefinitionsQuizIntent give me defintion quiz
+DefinitionsQuizIntent give me definitions quiz
+DefinitionsQuizIntent give me a defintion quiz
+DefinitionsQuizIntent give me a definitions quiz
+DefinitionsQuizIntent give me the defintion quiz
+DefinitionsQuizIntent give me the definitions quiz
+DefinitionsQuizIntent quiz me by defintion
+DefinitionsQuizIntent quiz me by definitions
 CatchAllIntent {CatchAll}

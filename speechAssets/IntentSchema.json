@@ -25,6 +25,14 @@
             "slots": []
         },
         {
+            "intent": "ByTermIntent",
+            "slots": []
+        },
+        {
+            "intent": "ByDefinitionIntent",
+            "slots": []
+        },
+        {
             "intent": "ReviewByTermIntent",
             "slots": []
         },
@@ -81,11 +89,11 @@
             "slots": []
         },
         {
-            "intent": "MatchingQuizIntent",
+            "intent": "TermsQuizIntent",
             "slots": []
         },
         {
-            "intent": "MeaningsQuizIntent",
+            "intent": "DefinitionsQuizIntent",
             "slots": []
         },
         {
