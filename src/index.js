@@ -21,9 +21,9 @@ exports.handler = function (event, context, callback) {
         selectNavItemFromListHandlers,
         setMenuHandlers,
         reviewMenuHandlers,
-        reviewingHandler,
+        reviewingHandlers,
         quizMenuHandlers,
-        meaningsQuiz);
+        meaningsQuizHandlers);
     alexa.execute();
 };
 
@@ -91,11 +91,10 @@ function LoadSetId(userId) {
 
 var entryPointHandlers = {
     'LaunchRequest': function () {
-        var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
         var accessToken = this.event.session.user.accessToken;
-        this.handler.state = states.MAINMENU;
         if (!accessToken) {
-            this.emitWithState('LinkAccountIntent');
+            var speechOutput = this.t("LINK_ACCOUNT");
+            this.emit(':tellWithLinkAccountCard', speechOutput);
         } else {
             var token = parseToken(accessToken);
             quizlet = new QuizletAPI(token.user_id, token.access_token);
@@ -105,13 +104,14 @@ var entryPointHandlers = {
                         this.handler.state = '';
                         this.emitWithState('QueryLastSet', data.Item.Data.S);
                     } else {
+                        var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
                         this.handler.state = states.MAINMENU;
                         this.emitWithState('MainMenu', speechOutput);
                     }
                 })
                 .catch((err) => {
                     console.error('error retrieving previous set: ' + err);
-                    this.emit(":tell", this.t("UNEXPECTED"));
+                    this.emit(':tell', this.t("UNEXPECTED"));
                 });
         }
     },
@@ -138,7 +138,7 @@ var entryPointHandlers = {
             })
             .catch((err) => {
                 console.error('error getting set: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     }
 };
@@ -162,18 +162,6 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'SelectClassIntent': function () {
         this.handler.state = states.MAINMENU;
         this.emitWithState('QueryUserClasses');
-    },
-    'LinkAccountIntent': function () {
-        var accessToken = this.event.session.user.accessToken;
-        if (!accessToken) {
-            var speechOutput = this.t("LINK_ACCOUNT");
-            this.emit(':tellWithLinkAccountCard', speechOutput);
-        } else {
-            var token = parseToken(accessToken);
-            console.log('user_id: ' + token.user_id + ' access_token: ' + token.access_token);
-            var speechOutput = this.t("LINKED", token.user_id, token.access_token);
-            this.emit(':tell', speechOutput);
-        }
     },
     'AMAZON.RepeatIntent': function () {
         this.handler.state = states.MAINMENU;
@@ -217,7 +205,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             })
             .catch((err) => {
                 console.error('error getting sets: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
     'QueryUserFavorites': function () {
@@ -238,7 +226,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             })
             .catch((err) => {
                 console.error('error getting favorite sets: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
     'QueryUserClasses': function () {
@@ -259,7 +247,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             })
             .catch((err) => {
                 console.error('error getting classes: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
     'QueryClassSets': function () {
@@ -281,7 +269,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             })
             .catch((err) => {
                 console.error('error getting class sets: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
     'SelectOption': function (prefix) {
@@ -336,7 +324,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 this.emit(':ask', speechOutput, repromptSpeech);
                 break;
             default:
-                this.emit(":tell", this.t("UNEXPECTED"));
+                this.emit(':tell', this.t("UNEXPECTED"));
                 break;
         }
     },
@@ -669,7 +657,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             })
             .catch((err) => {
                 console.error('error storing previous set: ' + err);
-                this.emit(":tell", this.t("UNEXPECTED"));
+                this.emit(':tell', this.t("UNEXPECTED"));
             });
     },
     'CheckIsFavorite': function () {
@@ -688,7 +676,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             })
             .catch((err) => {
                 console.error('error getting favorite sets: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
     'ReturnSetInfo': function () {
@@ -773,7 +761,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             })
             .catch((err) => {
                 console.error('error getting set: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
     'MarkUserSetFavorite': function (set_id) {
@@ -787,7 +775,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             })
             .catch((err) => {
                 console.error('error getting set: ' + err);
-                this.emit(":tell", this.t("QUIZLETERROR"));
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     }
 });
@@ -836,7 +824,7 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
     },
 });
 
-var reviewingHandler = Alexa.CreateStateHandler(states.REVIEWING, {
+var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
     'ReviewSet': function () {
         this.attributes['quizlet'].index = 0;
         var speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH") + "<break time=\"1s\"/>";
@@ -942,7 +930,7 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
     },
 });
 
-var meaningsQuiz = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
+var meaningsQuizHandlers = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
     'GenerateQuestion': function (prefix) {
         if (this.attributes['quizlet'].index == this.attributes['quizlet'].quiz_terms.length) {
             var correct = this.attributes['quizlet'].correct;
@@ -977,7 +965,7 @@ var meaningsQuiz = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
         var speechOutput = (prefix || "") + this.t("DOES_TERM_MEAN_DEFINITION", term, definition);
         var repromptSpeech = this.t("MEANINGS_QUIZ_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
-        this.emit(":ask", speechOutput, repromptSpeech);
+        this.emit(':ask', speechOutput, repromptSpeech);
     },
     'AMAZON.YesIntent': function () {
         var speechOutput;
@@ -1062,7 +1050,7 @@ const languageStrings = {
             "ONE_FAVORITE_SET": "You have one favorite set. ",
             "ONE_CLASS_SET": "You have one set in this class. ",
             "ONE_CLASS": "You have one class. ",
-            "LAST_SET": "The last set you used is named<break time=\"100ms\"/>%s. ",
+            "LAST_SET": "The name of the last set you used is %s. ",
             "SET": "Set ",
             "CLASS": "Class ",
             "USE_SET": "Do you want to use this set? ",
@@ -1079,13 +1067,13 @@ const languageStrings = {
             "CHOOSE_CLASS_REPROMPT": "Say the number of the class you want. %s or say help me",
             "SAY_NEXT_MORE_CLASSES": "Say next for more classes. ",
             "HELP_MESSAGE_CHOOSE_CLASS": "Say the number of the class you want. %s Say repeat to hear the choices again. Say start over to find new sets or classes or you can say exit. Now, %s",
-            "SET_NAME_IS": "The set name is<break time=\"100ms\"/>%s. ",
-            "CLASS_NAME_IS": "The class name is<break time=\"100ms\"/>%s. ",
+            "SET_NAME_IS": "The set name is %s. ",
+            "CLASS_NAME_IS": "The class name is %s. ",
             "CHOSEN_SET": "You have chosen the set named<break time=\"100ms\"/>%s. ",
             "SET_HAS_X_TERMS": "This set has %s terms. ",
             "SET_MENU": "You can ask me to review the set, take a quiz, or %s.",
-            "SET_MENU_REPROMPT": "You can ask me to review the set, quiz me, %s, or say help me. ",
-            "HELP_MESSAGE_SET_MENU": "Say review the set to review terms and definitions. Say quiz me to take a quiz. Say %s to %s. Say repeat to hear the commands again. Say start over to find new sets or classes or you can say exit. Now, %s",
+            "SET_MENU_REPROMPT": "You can ask me to review the set, take a quiz, %s, or say help me. ",
+            "HELP_MESSAGE_SET_MENU": "Say review the set to review terms and definitions. Say take a quiz to take a quiz. Say %s to %s. Say repeat to hear the commands again. Say start over to find new sets or classes or you can say exit. Now, %s",
             "MARK_FAVORITE": "mark the set as a favorite",
             "UNMARK_FAVORITE": "unmark the set as a favorite",
             "MARKED_FAVORITE": "Great! I have marked this set as a favorite. ",
