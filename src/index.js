@@ -48,6 +48,7 @@ const dataType = {
 
 const ITEMS_PER_PAGE = 4;
 const ITEMS_PER_QUIZ = 5;
+const GOOD_PERCENTAGE = 0.70;
 
 function StoreSetId(userId, id) {
     return new Promise(
@@ -947,10 +948,9 @@ var meaningsQuiz = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
             var correct = this.attributes['quizlet'].correct;
             var questions = this.attributes['quizlet'].quiz_terms.length;
             var praise = "";
-            console.log("percentage: " + (correct / questions));
             if ((correct / questions) == 1) {
                 praise = this.t("GREAT_WORK");
-            } else if ((correct / questions) > 0.70) {
+            } else if ((correct / questions) >= GOOD_PERCENTAGE) {
                 praise = this.t("GOOD_JOB");
             }
             var speechOutput = (prefix || "") + this.t("QUIZ_COMPLETE") + this.t("NUMBER_OF_QUESTIONS_CORRECT", correct, questions) + praise;
@@ -974,7 +974,7 @@ var meaningsQuiz = Alexa.CreateStateHandler(states.MEANINGSQUIZ, {
     'AskQuestion': function (prefix) {
         var term = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].term;
         var definition = this.attributes['quizlet'].set.terms[this.attributes['quizlet'].choice_index].definition;
-        var speechOutput = (prefix || "") + "Does the term " + term + " mean " + definition;
+        var speechOutput = (prefix || "") + this.t("DOES_TERM_MEAN_DEFINITION", term, definition);
         var repromptSpeech = this.t("MEANINGS_QUIZ_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
         this.emit(":ask", speechOutput, repromptSpeech);
@@ -1103,6 +1103,7 @@ const languageStrings = {
             "QUIZ_MENU": "You can ask me to take a matching quiz or take a meanings quiz. ",
             "QUIZ_MENU_REPROMPT": "You can ask me to take a matching quiz or take a meanings quiz, or say help me. ",
             "HELP_MESSAGE_QUIZ_MENU": "Say take a matching quiz to take a matching quiz. Say take a meanings quiz to take a meanings quiz. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
+            "DOES_TERM_MEAN_DEFINITION": "Does the term %s mean %s? ",
             "QUIZ_COMPLETE": "Quiz Complete. ",
             "CORRECT": "Correct! ",
             "INCORRECT": "Sorry, that is incorrect. ",
