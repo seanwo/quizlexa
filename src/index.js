@@ -23,7 +23,8 @@ exports.handler = function (event, context, callback) {
         reviewMenuHandlers,
         reviewingHandlers,
         quizMenuHandlers,
-        termsQuizHandlers);
+        termsQuizHandlers,
+        definitionsQuizHandlers);
     alexa.execute();
 };
 
@@ -35,7 +36,8 @@ const states = {
     REVIEWMENU: '_REVIEWMENU',
     REVIEWING: '_REVIEWING',
     QUIZMENU: '_QUIZMENU',
-    TERMSQUIZ: '_TERMSQUIZ'
+    TERMSQUIZ: '_TERMSQUIZ',
+    DEFINITIONSQUIZ: '_DEFINITIONSQUIZ'
 };
 
 const dataType = {
@@ -904,7 +906,14 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
         this.emitWithState('DefinitionsQuizIntent');
     },
     'DefinitionsQuizIntent': function () {
-        this.emit(':tell', "Definition Quiz Intent. " + this.t("NOTIMPL"));
+        var set = this.attributes['quizlet'].set;
+        this.attributes['quizlet'].quiz_terms = shuffle.pick(set.terms, { 'picks': Math.min(ITEMS_PER_QUIZ, set.terms.length) });
+        this.attributes['quizlet'].correct = 0;
+        this.attributes['quizlet'].index = 0;
+        var questions = this.attributes['quizlet'].quiz_terms.length;
+        var speechOutput = this.t("LETS_BEGIN") + this.t("THERE_WILL_BE_X_QUESTIONS", questions) + "<break time=\"500ms\"/>";
+        this.handler.state = states.DEFINITIONSQUIZ;
+        this.emitWithState('GenerateQuestion', speechOutput);
     },
     'ByTermIntent': function () {
         this.handler.state = states.QUIZMENU;
@@ -916,7 +925,7 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
         this.attributes['quizlet'].correct = 0;
         this.attributes['quizlet'].index = 0;
         var questions = this.attributes['quizlet'].quiz_terms.length;
-        var speechOutput = this.t("LETS_BEGIN") + this.t("THERE_WILL_BE_X_QUESTIONS", questions) + "<break time=\"1s\"/>";
+        var speechOutput = this.t("LETS_BEGIN") + this.t("THERE_WILL_BE_X_QUESTIONS", questions) + "<break time=\"500ms\"/>";
         this.handler.state = states.TERMSQUIZ;
         this.emitWithState('GenerateQuestion', speechOutput);
     },
@@ -1035,6 +1044,138 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
     }
 });
 
+var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
+    'GenerateQuestion': function (prefix) {
+        if (this.attributes['quizlet'].index == this.attributes['quizlet'].quiz_terms.length) {
+            var correct = this.attributes['quizlet'].correct;
+            var questions = this.attributes['quizlet'].quiz_terms.length;
+            var praise = "";
+            if ((correct / questions) == 1) {
+                praise = this.t("GREAT_WORK");
+            } else if ((correct / questions) >= GOOD_PERCENTAGE) {
+                praise = this.t("GOOD_JOB");
+            }
+            var speechOutput = (prefix || "") + this.t("QUIZ_COMPLETE") + this.t("NUMBER_OF_QUESTIONS_CORRECT", correct, questions) + praise;
+            this.handler.state = states.SETMENU;
+            this.emitWithState('SetMenu', speechOutput);
+        } else {
+            this.attributes['quizlet'].choice_index = [];
+            var contains_real_answer = false;
+            var set = this.attributes['quizlet'].set;
+            var possible_answers = shuffle.pick(set.terms, { 'picks': Math.min(3, set.terms.length) });
+            for (var i = 0; i < possible_answers.length; i++) {
+                var rank = possible_answers[i].rank;
+                if (rank == this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].rank) {
+                    contains_real_answer = true;
+                    this.attributes['quizlet'].correct_answer = i;
+                }
+                this.attributes['quizlet'].choice_index.push(possible_answers[i].rank);
+            }
+            if (contains_real_answer != true) {
+                var answer = getRandomNumber(0, this.attributes['quizlet'].choice_index.length - 1);
+                this.attributes['quizlet'].choice_index[answer] = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].rank;
+                this.attributes['quizlet'].correct_answer = answer;
+            }
+            this.handler.state = states.DEFINITIONSQUIZ;
+            this.emitWithState('AskQuestion', prefix);
+        }
+    },
+    'AskQuestion': function (prefix) {
+        var choice_index = this.attributes['quizlet'].choice_index;
+        var definition = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].definition;
+        var speechOutput = (prefix || "") + this.t("WHICH_DEFINITION_MATCHES") + "<break time=\"1s\"/>" + definition + "<break time=\"1s\"/>";
+        for (var i = 0; i < choice_index.length; i++) {
+            var option = this.attributes['quizlet'].set.terms[choice_index[i]].term;
+            speechOutput += this.t("TERM") + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + option;
+            if (i != (choice_index.length - 1)) {
+                speechOutput += "<break time=\"1s\"/>";
+            }
+        }
+        var repromptSpeech = this.t("DEFINITIONS_QUIZ_REPROMPT");
+        this.attributes["reprompt"] = repromptSpeech;
+        this.emit(':ask', speechOutput, repromptSpeech);
+    },
+    'TermOneIntent': function () {
+        this.handler.state = states.DEFINITIONSQUIZ;
+        this.emitWithState('OneIntent');
+    },
+    'TermTwoIntent': function () {
+        this.handler.state = states.DEFINITIONSQUIZ;
+        this.emitWithState('TwoIntent');
+    },
+    'TermThreeIntent': function () {
+        this.handler.state = states.DEFINITIONSQUIZ;
+        this.emitWithState('ThreeIntent');
+    },
+    'OneIntent': function () {
+        var speechOutput;
+        if (this.attributes['quizlet'].correct_answer == 0) {
+            var speechOutput = this.t("CORRECT");
+            this.attributes['quizlet'].correct += 1;
+        } else {
+            var speechOutput = this.t("INCORRECT");
+        }
+        this.attributes['quizlet'].index += 1;
+        this.handler.state = states.DEFINITIONSQUIZ;
+        this.emitWithState('GenerateQuestion', speechOutput);
+    },
+    'TwoIntent': function () {
+        var speechOutput;
+        if (this.attributes['quizlet'].correct_answer == 1) {
+            var speechOutput = this.t("CORRECT");
+            this.attributes['quizlet'].correct += 1;
+        } else {
+            var speechOutput = this.t("INCORRECT");
+        }
+        this.attributes['quizlet'].index += 1;
+        this.handler.state = states.DEFINITIONSQUIZ;
+        this.emitWithState('GenerateQuestion', speechOutput);
+    },
+    'ThreeIntent': function () {
+        var length = this.attributes['quizlet'].choice_index.length;
+        if (length < 3) {
+            this.handler.state = states.DEFINITIONSQUIZ;
+            this.emitWithState('Unhandled');
+        } else {
+            var speechOutput;
+            if (this.attributes['quizlet'].correct_answer == 2) {
+                var speechOutput = this.t("CORRECT");
+                this.attributes['quizlet'].correct += 1;
+            } else {
+                var speechOutput = this.t("INCORRECT");
+            }
+            this.attributes['quizlet'].index += 1;
+            this.handler.state = states.DEFINITIONSQUIZ;
+            this.emitWithState('GenerateQuestion', speechOutput);
+        }
+    },
+    'AMAZON.RepeatIntent': function () {
+        this.handler.state = states.DEFINITIONSQUIZ;
+        this.emitWithState('AskQuestion');
+    },
+    'AMAZON.CancelIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StopIntent': function () {
+        var speechOutput = this.t("STOP_MESSAGE");
+        this.emit(':tell', speechOutput);
+    },
+    'AMAZON.StartOverIntent': function () {
+        this.handler.state = states.SETMENU;
+        this.emitWithState('SetMenu');
+    },
+    'AMAZON.HelpIntent': function () {
+        var speechOutput = this.t("HELP_DEFINITIONS_QUIZ_MENU", this.t("HOW_CAN_I_HELP"));
+        this.emit(':ask', speechOutput, this.t("HELP_ME"));
+    },
+    'Unhandled': function () {
+        var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
+        var repromptSpeech = this.t("HELP_ME");
+        this.emit(':ask', speechOutput, repromptSpeech);
+    }
+});
+
 function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -1057,9 +1198,9 @@ const languageStrings = {
             "NO_UNDERSTAND": "Sorry, I don't quite understand what you mean. ",
             "MAIN_MENU": "You can ask me to find a favorite set, find a set, or find a class. ",
             "MAIN_MENU_REPROMPT": "You can ask me to find a favorite set, find a set, or find a class, or say help me. ",
-            "HELP_MESSAGE_MAIN_MENU": "Say find a favorite set to find one of your favorite sets. Say find a set to find one of your sets.  Say find a class to find one of your classes. Say repeat to hear the commands again or you can say exit...Now, %s",
-            "LINK_ACCOUNT": "Your Quizlet account is not linked.  Please use the Alexa app to link your account. ",
-            "NO_SETS": "You do not have any sets yet. Go to Quizlet dot com and add some sets to use.  Goodbye! ",
+            "HELP_MESSAGE_MAIN_MENU": "Say find a favorite set to find one of your favorite sets. Say find a set to find one of your sets. Say find a class to find one of your classes. Say repeat to hear the commands again or you can say exit...Now, %s",
+            "LINK_ACCOUNT": "Your Quizlet account is not linked. Please use the Alexa app to link your account. ",
+            "NO_SETS": "You do not have any sets yet. Go to Quizlet dot com and add some sets to use. Goodbye! ",
             "NO_FAVORITE_SETS": "You do not have any favorite sets yet. ",
             "NO_CLASS_SETS": "You do not have any sets in this class yet. ",
             "NO_CLASSES": "You have not set up any classes set up yet. ",
@@ -1072,10 +1213,10 @@ const languageStrings = {
             "CLASS": "Class ",
             "USE_SET": "Do you want to use this set? ",
             "USE_SET_REPROMPT": "Say yes to use the set. Say no to find new sets or classes or say help me. ",
-            "HELP_MESSAGE_USE_SET": "Say yes to use the set. Say no to find new sets or classes.  Say repeat to hear the set name again or you can say exit. Now, %s",
+            "HELP_MESSAGE_USE_SET": "Say yes to use the set. Say no to find new sets or classes. Say repeat to hear the set name again or you can say exit. Now, %s",
             "USE_CLASS": "Do you want to use this class? ",
             "USE_CLASS_REPROMPT": "Say yes to use the class. Say no to find new sets or classes or say help me. ",
-            "HELP_MESSAGE_USE_CLASS": "Say yes to use the class. Say no to find new sets or classes.  Say repeat to hear the class name again or you can say exit. Now, %s",
+            "HELP_MESSAGE_USE_CLASS": "Say yes to use the class. Say no to find new sets or classes. Say repeat to hear the class name again or you can say exit. Now, %s",
             "CHOOSE_SET": "Please choose from the following sets. ",
             "CHOOSE_SET_REPROMPT": "Say the number of the set you want. %s or say help me",
             "SAY_NEXT_MORE_SETS": "Say next for more sets. ",
@@ -1105,7 +1246,7 @@ const languageStrings = {
             "DEFINITION": "Definition ",
             "REVIEW_COMPLETE": "Review Complete. ",
             "NEXT_TERM": "Say next for the next term. ",
-            "HELP_MESSAGE_REVIEWING": "Say nex for the next term.  Say repeat to hear the term again.  Say start over to do other things with this set or you can say exit. Now, %s",
+            "HELP_MESSAGE_REVIEWING": "Say nex for the next term. Say repeat to hear the term again. Say start over to do other things with this set or you can say exit. Now, %s",
             "QUIZ_MENU": "You can ask me to take a terms quiz or take a definitions quiz. ",
             "QUIZ_MENU_REPROMPT": "You can ask me to take a terms quiz or take a definitions quiz, or say help me. ",
             "HELP_MESSAGE_QUIZ_MENU": "Say take a terms quiz to take a terms quiz. Say take a definitions quiz to take a definitions quiz. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
@@ -1113,15 +1254,17 @@ const languageStrings = {
             "QUIZ_COMPLETE": "Quiz Complete. ",
             "CORRECT": "Correct! ",
             "INCORRECT": "Sorry, that is incorrect. ",
-            "TERMS_QUIZ_REPROMPT": "Say yes if you believe the statement is true.  Say no if you believe the statement is false or say help me. ",
-            "HELP_TERMS_QUIZ_MENU": "Say yes if you believe the statement is true.  Say no if you believe the statement is false.  Say repeat to hear the question again.  Say start over to do other things with this set or you can say exit...Now, %s",
+            "TERMS_QUIZ_REPROMPT": "Say yes if you believe the statement is true. Say no if you believe the statement is false. Say repeat to hear the question again or say help me. ",
+            "HELP_TERMS_QUIZ_MENU": "Say yes if you believe the statement is true. Say no if you believe the statement is false. Say repeat to hear the question again. Say start over to do other things with this set or you can say exit...Now, %s",
+            "DEFINITIONS_QUIZ_REPROMPT": "Say the number of the term you believe matches the definition. Say repeat to hear the definition and choices again or say help me",
+            "HELP_DEFINITIONS_QUIZ_MENU": "Say the number of the term you believe matches the definition. Say repeat to hear the definition and choices again. Say start over to do other things with this set or you can say exit...Now, %s",
+            "WHICH_DEFINITION_MATCHES": "Which term matches the definition ",
             "NUMBER_OF_QUESTIONS_CORRECT": "You got %s questions out of %s correct. ",
             "GREAT_WORK": "Great work! ",
             "GOOD_JOB": "Good job. ",
-            "UNEXPECTED": "An unexpected error has occurred.  Please try again later! ",
-            "QUIZLETERROR": "There was an error communicating with Quizlet.  Please try again later! ",
-            "NOTIMPL": "This code path is not yet implemented. ",
-            "LINKED": "Your account is linked.  User ID %s.  Access Token <say-as interpret-as=\"characters\">%s</say-as>. "
+            "UNEXPECTED": "An unexpected error has occurred. Please try again later! ",
+            "QUIZLETERROR": "There was an error communicating with Quizlet. Please try again later! ",
+            "NOTIMPL": "This code path is not yet implemented. "
         }
     }
 };
