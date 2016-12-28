@@ -790,11 +790,11 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ReviewByTermIntent': function () {
-        this.handler.state = states.REVIEWING;
+        this.handler.state = states.REVIEWMENU;
         this.emitWithState('ByTermIntent');
     },
     'ReviewByDefinitionIntent': function () {
-        this.handler.state = states.REVIEWING;
+        this.handler.state = states.REVIEWMENU;
         this.emitWithState('ByDefinitionIntent');
     },
     'ByTermIntent': function () {
