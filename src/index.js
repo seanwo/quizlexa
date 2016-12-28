@@ -100,6 +100,7 @@ var entryPointHandlers = {
         } else {
             var token = parseToken(accessToken);
             quizlet = new QuizletAPI(token.user_id, token.access_token);
+            console.log("username: " + token.user_id + " token: " + token.access_token);
             LoadSetId(this.event.session.user.userId)
                 .then((data) => {
                     if ((data.Item !== undefined) && (data.Item.Data !== undefined)) {
@@ -118,11 +119,11 @@ var entryPointHandlers = {
         }
     },
     'Unhandled': function () {
-        this.handler.state = '';
-        this.emitWithState('LaunchRequest');
+        //     this.handler.state = '';
+        //     this.emitWithState('LaunchRequest');
     },
     'QueryLastSet': function (set_id) {
-        quizlet.getSet(set_id)
+        quizlet.getSafeSet(set_id)
             .then((data) => {
                 if (data.http_code) {
                     var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
@@ -191,7 +192,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'QueryUserSets': function () {
-        quizlet.getUserSets()
+        quizlet.getUserSetsBasic()
             .then((data) => {
                 if (data.length == 0) {
                     var speechOutput = this.t("NO_SETS");
@@ -211,7 +212,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             });
     },
     'QueryUserFavorites': function () {
-        quizlet.getUserFavorites()
+        quizlet.getUserFavoritesBasic()
             .then((data) => {
                 if (data.length == 0) {
                     var speechOutput = this.t("NO_FAVORITE_SETS");
@@ -232,7 +233,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             });
     },
     'QueryUserClasses': function () {
-        quizlet.getUserClasses()
+        quizlet.getUserClassesBasic()
             .then((data) => {
                 if (data.length == 0) {
                     var speechOutput = this.t("NO_CLASSES");
@@ -254,7 +255,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     },
     'QueryClassSets': function () {
         var class_id = this.attributes['quizlet'].class_id;
-        quizlet.getClassSets(class_id)
+        quizlet.getClassSetsBasic(class_id)
             .then((data) => {
                 if (data.length == 0) {
                     var speechOutput = this.t("NO_CLASS_SETS");
@@ -649,22 +650,30 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
 
 var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     'SelectSet': function () {
-        var set = this.attributes['quizlet'].data[this.attributes['quizlet'].index];
-        this.attributes['quizlet'] = {};
-        this.attributes['quizlet'].set = set;
-        StoreSetId(this.event.session.user.userId, set.id)
+        var id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
+        quizlet.getSafeSet(id)
             .then((data) => {
-                this.handler.state = states.SETMENU;
-                this.emitWithState('CheckIsFavorite');
+                this.attributes['quizlet'] = {};
+                this.attributes['quizlet'].set = data;
+                var set = this.attributes['quizlet'].set;
+                StoreSetId(this.event.session.user.userId, set.id)
+                    .then((data) => {
+                        this.handler.state = states.SETMENU;
+                        this.emitWithState('CheckIsFavorite');
+                    })
+                    .catch((err) => {
+                        console.error('error storing previous set: ' + err);
+                        this.emit(':tell', this.t("UNEXPECTED"));
+                    });
             })
             .catch((err) => {
-                console.error('error storing previous set: ' + err);
-                this.emit(':tell', this.t("UNEXPECTED"));
+                console.error('error getting user set ' + id + ':' + err);
+                this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
     'CheckIsFavorite': function () {
         var id = this.attributes['quizlet'].set.id;
-        quizlet.getUserFavorites()
+        quizlet.getUserFavoritesBasic()
             .then((data) => {
                 this.attributes['quizlet'].favorite = false;
                 for (var i = 0; i < data.length; i++) {
