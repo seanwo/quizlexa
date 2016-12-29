@@ -21,7 +21,11 @@
             "slots": []
         },
         {
-            "intent": "ToggleFavoriteIntent",
+            "intent": "AddFavoriteIntent",
+            "slots": []
+        },
+        {
+            "intent": "RemoveFavoriteIntent",
             "slots": []
         },
         {

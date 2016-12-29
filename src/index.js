@@ -735,9 +735,9 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var set = this.attributes['quizlet'].set;
         var favoriteState;
         if (this.attributes['quizlet'].favorite == true) {
-            favoriteState = this.t("UNMARK_FAVORITE");
+            favoriteState = this.t("REMOVE_FAVORITE");
         } else {
-            favoriteState = this.t("MARK_FAVORITE");
+            favoriteState = this.t("ADD_FAVORITE");
         }
         var speechOutput = (prefix || "") + this.t("SET_MENU", favoriteState);
         var repromptSpeech = this.t("SET_MENU_REPROMPT", favoriteState);
@@ -752,17 +752,22 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         this.handler.state = states.QUIZMENU;
         this.emitWithState('QuizMenu');
     },
-    'SelectFavoriteSetIntent': function () {
-        this.handler.state = states.SETMENU;
-        this.emitWithState('ToggleFavoriteIntent');
-    },
-    'ToggleFavoriteIntent': function () {
-        if (this.attributes['quizlet'].favorite == true) {
+    'AddFavoriteIntent': function () {
+        if (this.attributes['quizlet'].favorite == false) {
             this.handler.state = states.SETMENU;
-            this.emitWithState('UnMarkUserSetFavorite');
+            this.emitWithState('AddSetFavorite');
         } else {
             this.handler.state = states.SETMENU;
-            this.emitWithState('MarkUserSetFavorite');
+            this.emitWithState('Unhandled');
+        }
+    },
+    'RemoveFavoriteIntent': function () {
+        if (this.attributes['quizlet'].favorite == true) {
+            this.handler.state = states.SETMENU;
+            this.emitWithState('RemoveSetFavorite');
+        } else {
+            this.handler.state = states.SETMENU;
+            this.emitWithState('Unhandled');
         }
     },
     'AMAZON.RepeatIntent': function () {
@@ -784,9 +789,9 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     'AMAZON.HelpIntent': function () {
         var favoriteState;
         if (this.attributes['quizlet'].favorite == true) {
-            favoriteState = this.t("UNMARK_FAVORITE");
+            favoriteState = this.t("REMOVE_FAVORITE");
         } else {
-            favoriteState = this.t("MARK_FAVORITE");
+            favoriteState = this.t("ADD_FAVORITE");
         }
         var speechOutput = this.t("HELP_MESSAGE_SET_MENU", favoriteState, favoriteState, this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
@@ -796,11 +801,11 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
-    'UnMarkUserSetFavorite': function (set_id) {
+    'RemoveSetFavorite': function (set_id) {
         var set_id = this.attributes['quizlet'].set.id;
         quizlet.unmarkUserSetFavorite(set_id)
             .then((data) => {
-                var speechOutput = this.t("UNMARKED_FAVORITE");
+                var speechOutput = this.t("REMOVED_FAVORITE");
                 this.attributes['quizlet'].favorite = false;
                 this.handler.state = states.SETMENU;
                 this.emitWithState('SetMenu', speechOutput);
@@ -810,11 +815,11 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
                 this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
-    'MarkUserSetFavorite': function (set_id) {
+    'AddSetFavorite': function (set_id) {
         var set_id = this.attributes['quizlet'].set.id;
         quizlet.markUserSetFavorite(set_id)
             .then((data) => {
-                var speechOutput = this.t("MARKED_FAVORITE");
+                var speechOutput = this.t("ADDED_FAVORITE");
                 this.attributes['quizlet'].favorite = true;
                 this.handler.state = states.SETMENU;
                 this.emitWithState('SetMenu', speechOutput);
@@ -1300,10 +1305,10 @@ const languageStrings = {
             "SET_MENU": "You can ask me to review the set, take a quiz, or %s.",
             "SET_MENU_REPROMPT": "You can ask me to review the set, take a quiz, %s, or say help me. ",
             "HELP_MESSAGE_SET_MENU": "Say review the set to review terms and definitions. Say take a quiz to take a quiz. Say %s to %s. Say repeat to hear the commands again. Say start over to find new sets or classes or you can say exit. Now, %s",
-            "MARK_FAVORITE": "mark the set as a favorite",
-            "UNMARK_FAVORITE": "unmark the set as a favorite",
-            "MARKED_FAVORITE": "Great! I have marked this set as a favorite. ",
-            "UNMARKED_FAVORITE": "I have unmarked this set as a favorite. ",
+            "ADD_FAVORITE": "add the set as a favorite",
+            "REMOVE_FAVORITE": "remove the set as a favorite",
+            "ADDED_FAVORITE": "Great! I have added this set as a favorite. ",
+            "REMOVED_FAVORITE": "I have removed this set as a favorite. ",
             "REVIEW_MENU": "You can ask me to review by term or review by definition. ",
             "REVIEW_MENU_REPROMPT": "You can ask me to review by term, review by definition, or say help me. ",
             "HELP_MESSAGE_REVIEW_MENU": "Say review by term to review the set starting with the term. Say review by definition to review the set starting with the definition. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",

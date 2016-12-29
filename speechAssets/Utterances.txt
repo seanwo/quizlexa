@@ -82,66 +82,66 @@ QuizMeIntent quiz me on the set
 QuizMeIntent quiz me on this set
 QuizMeIntent take quiz
 QuizMeIntent take a quiz
-ToggleFavoriteIntent mark
-ToggleFavoriteIntent mark favorite
-ToggleFavoriteIntent mark as favorite
-ToggleFavoriteIntent mark as favorite set
-ToggleFavoriteIntent mark as a favorite
-ToggleFavoriteIntent mark as a favorite set
-ToggleFavoriteIntent mark set favorite
-ToggleFavoriteIntent mark the set favorite
-ToggleFavoriteIntent mark this set favorite
-ToggleFavoriteIntent mark set as a favorite
-ToggleFavoriteIntent mark the set as a favorite
-ToggleFavoriteIntent mark this set as a favorite
-ToggleFavoriteIntent mark set as a favorite set
-ToggleFavoriteIntent mark the set as a favorite set
-ToggleFavoriteIntent mark this set as a favorite set
-ToggleFavoriteIntent unmark
-ToggleFavoriteIntent unmark favorite
-ToggleFavoriteIntent unmark as favorite
-ToggleFavoriteIntent unmark as favorite set
-ToggleFavoriteIntent unmark as a favorite
-ToggleFavoriteIntent unmark as a favorite set
-ToggleFavoriteIntent unmark set favorite
-ToggleFavoriteIntent unmark the set favorite
-ToggleFavoriteIntent unmark this set favorite
-ToggleFavoriteIntent unmark set as a favorite
-ToggleFavoriteIntent unmark the set as a favorite
-ToggleFavoriteIntent unmark this set as a favorite
-ToggleFavoriteIntent unmark set as a favorite set
-ToggleFavoriteIntent unmark the set as a favorite set
-ToggleFavoriteIntent unmark this set as a favorite set
-ToggleFavoriteIntent remove
-ToggleFavoriteIntent remove favorite
-ToggleFavoriteIntent remove as favorite
-ToggleFavoriteIntent remove as favorite set
-ToggleFavoriteIntent remove as a favorite
-ToggleFavoriteIntent remove as a favorite set
-ToggleFavoriteIntent remove set favorite
-ToggleFavoriteIntent remove the set favorite
-ToggleFavoriteIntent remove this set favorite
-ToggleFavoriteIntent remove set as a favorite
-ToggleFavoriteIntent remove the set as a favorite
-ToggleFavoriteIntent remove this set as a favorite
-ToggleFavoriteIntent remove set as a favorite set
-ToggleFavoriteIntent remove the set as a favorite set
-ToggleFavoriteIntent remove this set as a favorite set
-ToggleFavoriteIntent add
-ToggleFavoriteIntent add favorite
-ToggleFavoriteIntent add as favorite
-ToggleFavoriteIntent add as favorite set
-ToggleFavoriteIntent add as a favorite
-ToggleFavoriteIntent add as a favorite set
-ToggleFavoriteIntent add set favorite
-ToggleFavoriteIntent add the set favorite
-ToggleFavoriteIntent add this set favorite
-ToggleFavoriteIntent add set as a favorite
-ToggleFavoriteIntent add the set as a favorite
-ToggleFavoriteIntent add this set as a favorite
-ToggleFavoriteIntent add set as a favorite set
-ToggleFavoriteIntent add the set as a favorite set
-ToggleFavoriteIntent add this set as a favorite set
+AddFavoriteIntent add
+AddFavoriteIntent add favorite
+AddFavoriteIntent add as favorite
+AddFavoriteIntent add as favorite set
+AddFavoriteIntent add as a favorite
+AddFavoriteIntent add as a favorite set
+AddFavoriteIntent add set favorite
+AddFavoriteIntent add the set favorite
+AddFavoriteIntent add this set favorite
+AddFavoriteIntent add set as a favorite
+AddFavoriteIntent add the set as a favorite
+AddFavoriteIntent add this set as a favorite
+AddFavoriteIntent add set as a favorite set
+AddFavoriteIntent add the set as a favorite set
+AddFavoriteIntent add this set as a favorite set
+AddFavoriteIntent mark
+AddFavoriteIntent mark favorite
+AddFavoriteIntent mark as favorite
+AddFavoriteIntent mark as favorite set
+AddFavoriteIntent mark as a favorite
+AddFavoriteIntent mark as a favorite set
+AddFavoriteIntent mark set favorite
+AddFavoriteIntent mark the set favorite
+AddFavoriteIntent mark this set favorite
+AddFavoriteIntent mark set as a favorite
+AddFavoriteIntent mark the set as a favorite
+AddFavoriteIntent mark this set as a favorite
+AddFavoriteIntent mark set as a favorite set
+AddFavoriteIntent mark the set as a favorite set
+AddFavoriteIntent mark this set as a favorite set
+RemoveFavoriteIntent remove
+RemoveFavoriteIntent remove favorite
+RemoveFavoriteIntent remove as favorite
+RemoveFavoriteIntent remove as favorite set
+RemoveFavoriteIntent remove as a favorite
+RemoveFavoriteIntent remove as a favorite set
+RemoveFavoriteIntent remove set favorite
+RemoveFavoriteIntent remove the set favorite
+RemoveFavoriteIntent remove this set favorite
+RemoveFavoriteIntent remove set as a favorite
+RemoveFavoriteIntent remove the set as a favorite
+RemoveFavoriteIntent remove this set as a favorite
+RemoveFavoriteIntent remove set as a favorite set
+RemoveFavoriteIntent remove the set as a favorite set
+RemoveFavoriteIntent remove this set as a favorite set
+RemoveFavoriteIntent unmark
+RemoveFavoriteIntent unmark favorite
+RemoveFavoriteIntent unmark as favorite
+RemoveFavoriteIntent unmark as favorite set
+RemoveFavoriteIntent unmark as a favorite
+RemoveFavoriteIntent unmark as a favorite set
+RemoveFavoriteIntent unmark set favorite
+RemoveFavoriteIntent unmark the set favorite
+RemoveFavoriteIntent unmark this set favorite
+RemoveFavoriteIntent unmark set as a favorite
+RemoveFavoriteIntent unmark the set as a favorite
+RemoveFavoriteIntent unmark this set as a favorite
+RemoveFavoriteIntent unmark set as a favorite set
+RemoveFavoriteIntent unmark the set as a favorite set
+RemoveFavoriteIntent unmark this set as a favorite set
 ByTermIntent term
 ByTermIntent terms
 ByTermIntent the terms
