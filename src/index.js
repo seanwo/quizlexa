@@ -49,7 +49,7 @@ const dataType = {
 };
 
 const ITEMS_PER_PAGE = 4;
-const ITEMS_PER_QUIZ = 5;
+const ITEMS_PER_QUIZ = 10;
 const GOOD_PERCENTAGE = 0.70;
 
 function StoreSetId(userId, id) {
@@ -846,7 +846,12 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
 var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
     'ReviewSet': function () {
         this.attributes['quizlet'].index = 0;
-        var speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH") + "<break time=\"1s\"/>";
+        var speechOutput;
+        if (this.attributes['quizlet'].reviewByTerm == true) {
+            speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH_TERM") + "<break time=\"1s\"/>";
+        } else {
+            speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH_DEFINITION") + "<break time=\"1s\"/>";
+        }
         this.handler.state = states.REVIEWING;
         this.emitWithState('Reviewing', speechOutput);
     },
@@ -854,14 +859,16 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         var set = this.attributes['quizlet'].set;
         var index = this.attributes['quizlet'].index;
         var speechOutput = (prefix || "");
+        var repromptSpeech;
         if (this.attributes['quizlet'].reviewByTerm == true) {
             speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + set.terms[index].term + "<break time=\"1s\"/>";
             speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + set.terms[index].definition;
+            repromptSpeech = this.t("NEXT_TERM_REPROMPT");
         } else {
             speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + set.terms[index].definition + "<break time=\"1s\"/>";
             speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + set.terms[index].term;
+            repromptSpeech = this.t("NEXT_DEFINITION_REPROMPT");
         }
-        var repromptSpeech = this.t("NEXT_TERM");
         this.attributes["reprompt"] = repromptSpeech;
         if (index == (set.terms.length - 1)) {
             speechOutput += "<break time=\"500ms\"/>" + this.t("REVIEW_COMPLETE") + "<break time=\"1s\"/>";
@@ -893,7 +900,12 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         this.emitWithState('SetMenu');
     },
     'AMAZON.HelpIntent': function () {
-        var speechOutput = this.t("HELP_MESSAGE_REVIEWING", this.t("HOW_CAN_I_HELP"));
+        var speechOutput;
+        if (this.attributes['quizlet'].reviewByTerm == true) {
+            speechOutput = this.t("HELP_MESSAGE_REVIEWING_BY_TERM", this.t("HOW_CAN_I_HELP"));
+        } else {
+            speechOutput = this.t("HELP_MESSAGE_REVIEWING_BY_DEFINITION", this.t("HOW_CAN_I_HELP"));
+        }
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
@@ -1250,12 +1262,15 @@ const languageStrings = {
             "HELP_MESSAGE_REVIEW_MENU": "Say review by term to review the set starting with the term. Say review by definition to review the set starting with the definition. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
             "LETS_BEGIN": "Let's begin. ",
             "THERE_WILL_BE_X_QUESTIONS": "There will be %s questions. ",
-            "NEXT_AFTER_EACH": "Say next after each term. ",
+            "NEXT_AFTER_EACH_TERM": "Say next after each term. ",
+            "NEXT_AFTER_EACH_DEFINITION": "Say next after each definition. ",
             "TERM": "Term ",
             "DEFINITION": "Definition ",
             "REVIEW_COMPLETE": "Review Complete. ",
-            "NEXT_TERM": "Say next for the next term. ",
-            "HELP_MESSAGE_REVIEWING": "Say nex for the next term. Say repeat to hear the term again. Say start over to do other things with this set or you can say exit. Now, %s",
+            "NEXT_TERM_REPROMPT": "Say next for the next term. Say repeat to hear the term again or say help me. ",
+            "NEXT_DEFINITION_REPROMPT": "Say next for the next definition.  Say repeat to hear the defintion again or say help me. ",
+            "HELP_MESSAGE_REVIEWING_BY_TERM": "Say next for the next term. Say repeat to hear the term again. Say start over to do other things with this set or you can say exit. Now, %s",
+            "HELP_MESSAGE_REVIEWING_BY_DEFINITION": "Say next for the next definition. Say repeat to hear the term again. Say start over to do other things with this set or you can say exit. Now, %s",
             "QUIZ_MENU": "You can ask me to take a terms quiz or take a definitions quiz. ",
             "QUIZ_MENU_REPROMPT": "You can ask me to take a terms quiz or take a definitions quiz, or say help me. ",
             "HELP_MESSAGE_QUIZ_MENU": "Say take a terms quiz to take a terms quiz. Say take a definitions quiz to take a definitions quiz. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
