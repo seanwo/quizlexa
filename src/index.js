@@ -51,6 +51,9 @@ const dataType = {
 const ITEMS_PER_PAGE = 4;
 const ITEMS_PER_QUIZ = 10;
 const GOOD_PERCENTAGE = 0.70;
+const MAX_SETS = 40;
+const MAX_CLASSES = 100;
+const MAX_TERMS_PER_SET = 100;
 
 function StoreSetId(userId, id) {
     return new Promise(
@@ -119,8 +122,9 @@ var entryPointHandlers = {
         }
     },
     'Unhandled': function () {
-        //     this.handler.state = '';
-        //     this.emitWithState('LaunchRequest');
+        // Why is this being called all the time from the alexa-sdk??
+        // this.handler.state = '';
+        // this.emitWithState('LaunchRequest');
     },
     'QueryLastSet': function (set_id) {
         quizlet.getSafeSet(set_id)
@@ -130,9 +134,12 @@ var entryPointHandlers = {
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('MainMenu', speechOutput);
                 } else {
+                    var set = {};
+                    set.id = data.id;
+                    set.title = data.title;
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].type = dataType.LAST_SET;
-                    this.attributes['quizlet'].data = new Array(data);
+                    this.attributes['quizlet'].data = new Array(set);
                     this.attributes['quizlet'].index = 0;
                     var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
                     this.handler.state = states.MAINMENU;
@@ -200,7 +207,11 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
                 } else {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].type = dataType.SET;
-                    this.attributes['quizlet'].data = data;
+                    if (data.length > MAX_SETS) {
+                        this.attributes['quizlet'].data = data.slice(0, MAX_SETS);
+                    } else {
+                        this.attributes['quizlet'].data = data;
+                    }
                     this.attributes['quizlet'].index = 0;
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('SelectOption');
@@ -221,7 +232,11 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
                 } else {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].type = dataType.FAVORITE_SET;
-                    this.attributes['quizlet'].data = data;
+                    if (data.length > MAX_SETS) {
+                        this.attributes['quizlet'].data = data.slice(0, MAX_SETS);
+                    } else {
+                        this.attributes['quizlet'].data = data;
+                    }
                     this.attributes['quizlet'].index = 0;
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('SelectOption');
@@ -242,7 +257,11 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
                 } else {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].type = dataType.CLASS;
-                    this.attributes['quizlet'].data = data;
+                    if (data.length > MAX_CLASSES) {
+                        this.attributes['quizlet'].data = data.slice(0, MAX_CLASSES);
+                    } else {
+                        this.attributes['quizlet'].data = data;
+                    }
                     this.attributes['quizlet'].index = 0;
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('SelectOption');
@@ -264,7 +283,11 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
                 } else {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].type = dataType.CLASS_SET;
-                    this.attributes['quizlet'].data = data;
+                    if (data.length > MAX_SETS) {
+                        this.attributes['quizlet'].data = data.slice(0, MAX_SETS);
+                    } else {
+                        this.attributes['quizlet'].data = data;
+                    }
                     this.attributes['quizlet'].index = 0;
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('SelectOption');
@@ -653,10 +676,13 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
         quizlet.getSafeSet(id)
             .then((data) => {
+                if (data.terms.length > MAX_TERMS_PER_SET) {
+                    data.terms = data.terms.slice(0, MAX_TERMS_PER_SET);
+                }
                 this.attributes['quizlet'] = {};
                 this.attributes['quizlet'].set = data;
-                var set = this.attributes['quizlet'].set;
-                StoreSetId(this.event.session.user.userId, set.id)
+                var id = this.attributes['quizlet'].set.id;
+                StoreSetId(this.event.session.user.userId, id)
                     .then((data) => {
                         this.handler.state = states.SETMENU;
                         this.emitWithState('CheckIsFavorite');
