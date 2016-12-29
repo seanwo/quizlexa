@@ -316,6 +316,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
         switch (type) {
             case dataType.SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
+                title = sanitize(title);
                 var speechOutput = this.t("ONE_SET") + this.t("SET_NAME_IS", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
@@ -323,6 +324,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 break;
             case dataType.LAST_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
+                title = sanitize(title);
                 var speechOutput = (prefix || "") + this.t("LAST_SET", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
@@ -330,6 +332,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 break;
             case dataType.FAVORITE_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
+                title = sanitize(title);
                 var speechOutput = this.t("ONE_FAVORITE_SET") + this.t("SET_NAME_IS", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
@@ -337,6 +340,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 break;
             case dataType.CLASS_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
+                title = sanitize(title);
                 var speechOutput = this.t("ONE_CLASS_SET") + this.t("SET_NAME_IS", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
@@ -344,6 +348,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
                 break;
             case dataType.CLASS:
                 var name = this.attributes['quizlet'].data[this.attributes['quizlet'].index].name;
+                name = sanitize(name);
                 var speechOutput = this.t("ONE_CLASS") + this.t("CLASS_NAME_IS", name) + this.t("USE_CLASS");
                 var repromptSpeech = this.t("USE_CLASS_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
@@ -444,6 +449,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
             } else {
                 option = data[i + index].title;
             }
+            option = sanitize(option);
             speechOutput += data_type + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + option + "<break time=\"1s\"/>";
         }
 
@@ -718,7 +724,9 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     },
     'ReturnSetInfo': function () {
         var set = this.attributes['quizlet'].set;
-        var speechOutput = this.t("CHOSEN_SET", set.title) + this.t("SET_HAS_X_TERMS", set.terms.length);
+        var title = set.title;
+        title = sanitize(title);
+        var speechOutput = this.t("CHOSEN_SET", title) + this.t("SET_HAS_X_TERMS", set.terms.length);
         this.handler.state = states.SETMENU;
         this.emitWithState('SetMenu', speechOutput);
     },
@@ -886,13 +894,17 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         var index = this.attributes['quizlet'].index;
         var speechOutput = (prefix || "");
         var repromptSpeech;
+        var term = set.terms[index].term;
+        var definition = set.terms[index].definition;
+        term = sanitize(term);
+        definition = sanitize(definition);
         if (this.attributes['quizlet'].reviewByTerm == true) {
-            speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + set.terms[index].term + "<break time=\"1s\"/>";
-            speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + set.terms[index].definition;
+            speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + term + "<break time=\"1s\"/>";
+            speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + definition;
             repromptSpeech = this.t("NEXT_TERM_REPROMPT");
         } else {
-            speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + set.terms[index].definition + "<break time=\"1s\"/>";
-            speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + set.terms[index].term;
+            speechOutput += this.t("DEFINITION") + "<break time=\"300ms\"/>" + definition + "<break time=\"1s\"/>";
+            speechOutput += this.t("TERM") + "<break time=\"300ms\"/>" + term;
             repromptSpeech = this.t("NEXT_DEFINITION_REPROMPT");
         }
         this.attributes["reprompt"] = repromptSpeech;
@@ -1035,6 +1047,8 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
     'AskQuestion': function (prefix) {
         var term = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].term;
         var definition = this.attributes['quizlet'].set.terms[this.attributes['quizlet'].choice_index].definition;
+        term = sanitize(term);
+        definition = sanitize(definition);
         var speechOutput = (prefix || "") + this.t("DOES_TERM_MEAN_DEFINITION", term, definition);
         var repromptSpeech = this.t("TERMS_QUIZ_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
@@ -1130,9 +1144,11 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
     'AskQuestion': function (prefix) {
         var choice_index = this.attributes['quizlet'].choice_index;
         var definition = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].definition;
+        definition = sanitize(definition);
         var speechOutput = (prefix || "") + this.t("WHICH_DEFINITION_MATCHES") + "<break time=\"1s\"/>" + definition + "<break time=\"1s\"/>";
         for (var i = 0; i < choice_index.length; i++) {
             var option = this.attributes['quizlet'].set.terms[choice_index[i]].term;
+            option = sanitize(option);
             speechOutput += this.t("TERM") + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + option;
             if (i != (choice_index.length - 1)) {
                 speechOutput += "<break time=\"1s\"/>";
@@ -1222,6 +1238,10 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
         this.emit(':ask', speechOutput, repromptSpeech);
     }
 });
+
+function sanitize(string) {
+    return string.replace(/[<&]/g, " ");
+}
 
 function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
