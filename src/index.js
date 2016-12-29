@@ -129,9 +129,14 @@ var entryPointHandlers = {
         quizlet.getSafeSet(set_id)
             .then((data) => {
                 if (data.http_code) {
-                    var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
-                    this.handler.state = states.MAINMENU;
-                    this.emitWithState('MainMenu', speechOutput);
+                    if ((data.http_code == 401) && (data.error == 'invalid_grant')) {
+                        var speechOutput = this.t("LINK_ACCOUNT");
+                        this.emit(':tellWithLinkAccountCard', speechOutput);
+                    } else {
+                        var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
+                        this.handler.state = states.MAINMENU;
+                        this.emitWithState('MainMenu', speechOutput);
+                    }
                 } else {
                     var set = {};
                     set.id = data.id;
@@ -200,7 +205,10 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'QueryUserSets': function () {
         quizlet.getUserSetsBasic()
             .then((data) => {
-                if (data.length == 0) {
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else if (data.length == 0) {
                     var speechOutput = this.t("NO_SETS");
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('MainMenu', speechOutput);
@@ -225,7 +233,10 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'QueryUserFavorites': function () {
         quizlet.getUserFavoritesBasic()
             .then((data) => {
-                if (data.length == 0) {
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else if (data.length == 0) {
                     var speechOutput = this.t("NO_FAVORITE_SETS");
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('MainMenu', speechOutput);
@@ -250,7 +261,10 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'QueryUserClasses': function () {
         quizlet.getUserClassesBasic()
             .then((data) => {
-                if (data.length == 0) {
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else if (data.length == 0) {
                     var speechOutput = this.t("NO_CLASSES");
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('MainMenu', speechOutput);
@@ -276,7 +290,10 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         var class_id = this.attributes['quizlet'].class_id;
         quizlet.getClassSetsBasic(class_id)
             .then((data) => {
-                if (data.length == 0) {
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else if (data.length == 0) {
                     var speechOutput = this.t("NO_CLASS_SETS");
                     this.handler.state = states.MAINMENU;
                     this.emitWithState('MainMenu', speechOutput);
@@ -682,21 +699,26 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
         quizlet.getSafeSet(id)
             .then((data) => {
-                if (data.terms.length > MAX_TERMS_PER_SET) {
-                    data.terms = data.terms.slice(0, MAX_TERMS_PER_SET);
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else {
+                    if (data.terms.length > MAX_TERMS_PER_SET) {
+                        data.terms = data.terms.slice(0, MAX_TERMS_PER_SET);
+                    }
+                    this.attributes['quizlet'] = {};
+                    this.attributes['quizlet'].set = data;
+                    var id = this.attributes['quizlet'].set.id;
+                    StoreSetId(this.event.session.user.userId, id)
+                        .then((data) => {
+                            this.handler.state = states.SETMENU;
+                            this.emitWithState('CheckIsFavorite');
+                        })
+                        .catch((err) => {
+                            console.error('error storing previous set: ' + err);
+                            this.emit(':tell', this.t("UNEXPECTED"));
+                        });
                 }
-                this.attributes['quizlet'] = {};
-                this.attributes['quizlet'].set = data;
-                var id = this.attributes['quizlet'].set.id;
-                StoreSetId(this.event.session.user.userId, id)
-                    .then((data) => {
-                        this.handler.state = states.SETMENU;
-                        this.emitWithState('CheckIsFavorite');
-                    })
-                    .catch((err) => {
-                        console.error('error storing previous set: ' + err);
-                        this.emit(':tell', this.t("UNEXPECTED"));
-                    });
             })
             .catch((err) => {
                 console.error('error getting user set ' + id + ':' + err);
@@ -707,15 +729,20 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var id = this.attributes['quizlet'].set.id;
         quizlet.getUserFavoritesBasic()
             .then((data) => {
-                this.attributes['quizlet'].favorite = false;
-                for (var i = 0; i < data.length; i++) {
-                    if (data[i].id == id) {
-                        this.attributes['quizlet'].favorite = true;
-                        break;
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else {
+                    this.attributes['quizlet'].favorite = false;
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].id == id) {
+                            this.attributes['quizlet'].favorite = true;
+                            break;
+                        }
                     }
+                    this.handler.state = states.SETMENU;
+                    this.emitWithState('ReturnSetInfo');
                 }
-                this.handler.state = states.SETMENU;
-                this.emitWithState('ReturnSetInfo');
             })
             .catch((err) => {
                 console.error('error getting favorite sets: ' + err);
@@ -804,10 +831,15 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var set_id = this.attributes['quizlet'].set.id;
         quizlet.unmarkUserSetFavorite(set_id)
             .then((data) => {
-                var speechOutput = this.t("REMOVED_FAVORITE");
-                this.attributes['quizlet'].favorite = false;
-                this.handler.state = states.SETMENU;
-                this.emitWithState('SetMenu', speechOutput);
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else {
+                    var speechOutput = this.t("REMOVED_FAVORITE");
+                    this.attributes['quizlet'].favorite = false;
+                    this.handler.state = states.SETMENU;
+                    this.emitWithState('SetMenu', speechOutput);
+                }
             })
             .catch((err) => {
                 console.error('error getting set: ' + err);
@@ -818,10 +850,15 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var set_id = this.attributes['quizlet'].set.id;
         quizlet.markUserSetFavorite(set_id)
             .then((data) => {
-                var speechOutput = this.t("ADDED_FAVORITE");
-                this.attributes['quizlet'].favorite = true;
-                this.handler.state = states.SETMENU;
-                this.emitWithState('SetMenu', speechOutput);
+                if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
+                    var speechOutput = this.t("LINK_ACCOUNT");
+                    this.emit(':tellWithLinkAccountCard', speechOutput);
+                } else {
+                    var speechOutput = this.t("ADDED_FAVORITE");
+                    this.attributes['quizlet'].favorite = true;
+                    this.handler.state = states.SETMENU;
+                    this.emitWithState('SetMenu', speechOutput);
+                }
             })
             .catch((err) => {
                 console.error('error getting set: ' + err);
