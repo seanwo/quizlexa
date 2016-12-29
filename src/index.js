@@ -427,14 +427,14 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
 
         if (type == dataType.CLASS) {
             data_type = this.t("CLASS");
-            speechOutput = this.t("CHOOSE_CLASS") + "<break time=\"1s\"/>";
+            speechOutput = this.t("CHOOSE_CLASS");
             var next = "";
             if (paginate == true) {
                 next = this.t("SAY_NEXT_MORE_CLASSES")
             }
             repromptSpeech = this.t("CHOOSE_CLASS_REPROMPT", next);
         } else {
-            speechOutput = this.t("CHOOSE_SET") + "<break time=\"1s\"/>";
+            speechOutput = this.t("CHOOSE_SET");
             data_type = this.t("SET");
             var next = "";
             if (paginate == true) {
@@ -451,14 +451,14 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
                 option = data[i + index].title;
             }
             option = sanitize(option);
-            speechOutput += data_type + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + option + "<break time=\"1s\"/>";
+            speechOutput += "<break time=\"1s\"/>" + data_type + "<say-as interpret-as=\"cardinal\">" + (i + 1) + "</say-as>. " + option;
         }
 
         if (paginate == true) {
             if (type == dataType.CLASS) {
-                speechOutput += this.t("SAY_NEXT_MORE_CLASSES");
+                speechOutput += "<break time=\"1s\"/>" + this.t("SAY_NEXT_MORE_CLASSES");
             } else {
-                speechOutput += this.t("SAY_NEXT_MORE_SETS");
+                speechOutput += "<break time=\"1s\"/>" + this.t("SAY_NEXT_MORE_SETS");
             }
         }
         this.attributes["reprompt"] = repromptSpeech;
