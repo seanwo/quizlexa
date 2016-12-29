@@ -203,7 +203,8 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             .then((data) => {
                 if (data.length == 0) {
                     var speechOutput = this.t("NO_SETS");
-                    this.emit(':tell', speechOutput);
+                    this.handler.state = states.MAINMENU;
+                    this.emitWithState('MainMenu', speechOutput);
                 } else {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].type = dataType.SET;
@@ -1267,10 +1268,10 @@ const languageStrings = {
             "MAIN_MENU_REPROMPT": "You can ask me to find a favorite set, find a set, or find a class, or say help me. ",
             "HELP_MESSAGE_MAIN_MENU": "Say find a favorite set to find one of your favorite sets. Say find a set to find one of your sets. Say find a class to find one of your classes. Say repeat to hear the commands again or you can say exit...Now, %s",
             "LINK_ACCOUNT": "Your Quizlet account is not linked. Please use the Alexa app to link your account. ",
-            "NO_SETS": "You do not have any sets yet. Go to Quizlet dot com and add some sets to use. Goodbye! ",
+            "NO_SETS": "You do not have any sets yet. Go to Quizlet dot com and add some sets to use. ",
             "NO_FAVORITE_SETS": "You do not have any favorite sets yet. ",
             "NO_CLASS_SETS": "You do not have any sets in this class yet. ",
-            "NO_CLASSES": "You have not set up any classes set up yet. ",
+            "NO_CLASSES": "You have not set up any classes yet. ",
             "ONE_SET": "You have one set. ",
             "ONE_FAVORITE_SET": "You have one favorite set. ",
             "ONE_CLASS_SET": "You have one set in this class. ",
