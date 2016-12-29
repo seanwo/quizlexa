@@ -888,9 +888,9 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         this.attributes['quizlet'].index = 0;
         var speechOutput;
         if (this.attributes['quizlet'].reviewByTerm == true) {
-            speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH_TERM") + "<break time=\"1s\"/>";
+            speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH_TERM") + "<break time=\"500ms\"/>";
         } else {
-            speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH_DEFINITION") + "<break time=\"1s\"/>";
+            speechOutput = this.t("LETS_BEGIN") + this.t("NEXT_AFTER_EACH_DEFINITION") + "<break time=\"500ms\"/>";
         }
         this.handler.state = states.REVIEWING;
         this.emitWithState('Reviewing', speechOutput);
@@ -1281,7 +1281,7 @@ const languageStrings = {
             "ONE_FAVORITE_SET": "You have one favorite set. ",
             "ONE_CLASS_SET": "You have one set in this class. ",
             "ONE_CLASS": "You have one class. ",
-            "LAST_SET": "The name of the last set you used is %s. ",
+            "LAST_SET": "The name of the last set you used is<break time=\"100ms\"/>%s. ",
             "SET": "Set ",
             "CLASS": "Class ",
             "USE_SET": "Do you want to use this set? ",
@@ -1298,8 +1298,8 @@ const languageStrings = {
             "CHOOSE_CLASS_REPROMPT": "Say the number of the class you want. %s or say help me",
             "SAY_NEXT_MORE_CLASSES": "Say next for more classes. ",
             "HELP_MESSAGE_CHOOSE_CLASS": "Say the number of the class you want. %s Say repeat to hear the choices again. Say start over to find new sets or classes or you can say exit. Now, %s",
-            "SET_NAME_IS": "The set name is %s. ",
-            "CLASS_NAME_IS": "The class name is %s. ",
+            "SET_NAME_IS": "The set name is<break time=\"100ms\"/>%s. ",
+            "CLASS_NAME_IS": "The class name is<break time=\"100ms\"/>%s. ",
             "CHOSEN_SET": "You have chosen the set named<break time=\"100ms\"/>%s. ",
             "SET_HAS_X_TERMS": "This set has %s terms. ",
             "SET_MENU": "You can ask me to review the set, take a quiz, or %s.",
@@ -1326,7 +1326,7 @@ const languageStrings = {
             "QUIZ_MENU": "You can ask me to take a terms quiz or take a definitions quiz. ",
             "QUIZ_MENU_REPROMPT": "You can ask me to take a terms quiz or take a definitions quiz, or say help me. ",
             "HELP_MESSAGE_QUIZ_MENU": "Say take a terms quiz to take a terms quiz. Say take a definitions quiz to take a definitions quiz. Say repeat to hear the commands again. Say start over to do other things with this set or you can say exit...Now, %s",
-            "DOES_TERM_MEAN_DEFINITION": "Does the term %s mean %s? ",
+            "DOES_TERM_MEAN_DEFINITION": "Does the term<break time=\"300ms\"/>%s<break time=\"300ms\"/>mean<break time=\"300ms\"/>%s? ",
             "QUIZ_COMPLETE": "Quiz Complete. ",
             "CORRECT": "Correct! ",
             "INCORRECT": "Sorry, that is incorrect. ",
