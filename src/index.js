@@ -95,7 +95,7 @@ function LoadSetId(userId) {
 };
 
 var entryPointHandlers = {
-    'LaunchRequest': function () {
+    'NewSession': function () {
         var accessToken = this.event.session.user.accessToken;
         if (!accessToken) {
             var speechOutput = this.t("LINK_ACCOUNT");
@@ -103,7 +103,7 @@ var entryPointHandlers = {
         } else {
             var token = parseToken(accessToken);
             quizlet = new QuizletAPI(token.user_id, token.access_token);
-            console.log("username: " + token.user_id + " token: " + token.access_token);
+            // console.log("username: " + token.user_id + " token: " + token.access_token);
             LoadSetId(this.event.session.user.userId)
                 .then((data) => {
                     if ((data.Item !== undefined) && (data.Item.Data !== undefined)) {
@@ -122,9 +122,8 @@ var entryPointHandlers = {
         }
     },
     'Unhandled': function () {
-        // Why is this being called all the time from the alexa-sdk??
-        // this.handler.state = '';
-        // this.emitWithState('LaunchRequest');
+        console.error(JSON.stringify(this.event.request));
+        this.emit(':tell', this.t("UNEXPECTED"));
     },
     'QueryLastSet': function (set_id) {
         quizlet.getSafeSet(set_id)
@@ -1288,7 +1287,7 @@ const languageStrings = {
             "NO_SETS": "You do not have any sets yet. Go to Quizlet dot com and add some sets to use. ",
             "NO_FAVORITE_SETS": "You do not have any favorite sets yet. ",
             "NO_CLASS_SETS": "You do not have any sets in this class yet. ",
-            "NO_CLASSES": "You have not set up any classes yet. ",
+            "NO_CLASSES": "You have not setup or joined any classes yet. ",
             "ONE_SET": "You have one set. ",
             "ONE_FAVORITE_SET": "You have one favorite set. ",
             "ONE_CLASS_SET": "You have one set in this class. ",
