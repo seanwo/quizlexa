@@ -1320,7 +1320,7 @@ const languageStrings = {
             "DEFINITION": "Definition ",
             "REVIEW_COMPLETE": "Review Complete. ",
             "NEXT_TERM_REPROMPT": "Say next for the next term. Say repeat to hear the term again or say help me. ",
-            "NEXT_DEFINITION_REPROMPT": "Say next for the next definition.  Say repeat to hear the defintion again or say help me. ",
+            "NEXT_DEFINITION_REPROMPT": "Say next for the next definition.  Say repeat to hear the definition again or say help me. ",
             "HELP_MESSAGE_REVIEWING_BY_TERM": "Say next for the next term. Say repeat to hear the term again. Say start over to do other things with this set or you can say exit. Now, %s",
             "HELP_MESSAGE_REVIEWING_BY_DEFINITION": "Say next for the next definition. Say repeat to hear the term again. Say start over to do other things with this set or you can say exit. Now, %s",
             "QUIZ_MENU": "You can ask me to take a terms quiz or take a definitions quiz. ",
