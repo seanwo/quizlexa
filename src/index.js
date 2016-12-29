@@ -1032,7 +1032,13 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
             } else if ((correct / questions) >= GOOD_PERCENTAGE) {
                 praise = this.t("GOOD_JOB");
             }
-            var speechOutput = (prefix || "") + this.t("QUIZ_COMPLETE") + this.t("NUMBER_OF_QUESTIONS_CORRECT", correct, questions) + praise;
+            var speechOutput = (prefix || "") + this.t("QUIZ_COMPLETE");
+            if (correct == 1) {
+                speechOutput += this.t("NUMBER_OF_QUESTIONS_CORRECT_SINGULAR", correct, questions);
+            } else {
+                speechOutput += this.t("NUMBER_OF_QUESTIONS_CORRECT", correct, questions);
+            }
+            speechOutput += praise;
             this.handler.state = states.SETMENU;
             this.emitWithState('SetMenu', speechOutput);
         } else {
@@ -1122,7 +1128,13 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
             } else if ((correct / questions) >= GOOD_PERCENTAGE) {
                 praise = this.t("GOOD_JOB");
             }
-            var speechOutput = (prefix || "") + this.t("QUIZ_COMPLETE") + this.t("NUMBER_OF_QUESTIONS_CORRECT", correct, questions) + praise;
+            var speechOutput = (prefix || "") + this.t("QUIZ_COMPLETE");
+            if (correct == 1) {
+                speechOutput += this.t("NUMBER_OF_QUESTIONS_CORRECT_SINGULAR", correct, questions);
+            } else {
+                speechOutput += this.t("NUMBER_OF_QUESTIONS_CORRECT", correct, questions);
+            }
+            speechOutput += praise;
             this.handler.state = states.SETMENU;
             this.emitWithState('SetMenu', speechOutput);
         } else {
@@ -1336,6 +1348,7 @@ const languageStrings = {
             "HELP_DEFINITIONS_QUIZ_MENU": "Say the number of the term you believe matches the definition. Say repeat to hear the definition and choices again. Say start over to do other things with this set or you can say exit...Now, %s",
             "WHICH_DEFINITION_MATCHES": "Which term matches the definition ",
             "NUMBER_OF_QUESTIONS_CORRECT": "You got %s questions out of %s correct. ",
+            "NUMBER_OF_QUESTIONS_CORRECT_SINGULAR": "You got %s question out of %s correct. ",
             "GREAT_WORK": "Great work! ",
             "GOOD_JOB": "Good job. ",
             "UNEXPECTED": "An unexpected error has occurred. Please try again later! ",
