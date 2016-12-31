@@ -2,7 +2,7 @@
 
 Alexa Skill for reviewing and taking quizes on terms and definitions stored in [Quizlet](https://quizlet.com).
 
-![alt text](https://quizlet.com/static/ThisUsesQuizlet-Blue.png "Powered by Quizlet")
+[![alt text](https://quizlet.com/static/ThisUsesQuizlet-Blue.png "Powered by Quizlet")](https://quizlet.com/)
 
 Dependencies:
 
