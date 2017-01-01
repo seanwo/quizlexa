@@ -103,7 +103,6 @@ var entryPointHandlers = {
         } else {
             var token = parseToken(accessToken);
             quizlet = new QuizletAPI(token.user_id, token.access_token);
-            // console.log("username: " + token.user_id + " token: " + token.access_token);
             LoadSetId(this.event.session.user.userId)
                 .then((data) => {
                     if ((data.Item !== undefined) && (data.Item.Data !== undefined)) {
@@ -122,7 +121,6 @@ var entryPointHandlers = {
         }
     },
     'Unhandled': function () {
-        console.error(JSON.stringify(this.event.request));
         this.emit(':tell', this.t("UNEXPECTED"));
     },
     'QueryLastSet': function (set_id) {
@@ -842,7 +840,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
                 }
             })
             .catch((err) => {
-                console.error('error getting set: ' + err);
+                console.error('error removing favorite set: ' + err);
                 this.emit(':tell', this.t("QUIZLETERROR"));
             });
     },
@@ -861,7 +859,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
                 }
             })
             .catch((err) => {
-                console.error('error getting set: ' + err);
+                console.error('error adding favorite set: ' + err);
                 this.emit(':tell', this.t("QUIZLETERROR"));
             });
     }
