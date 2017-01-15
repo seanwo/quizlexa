@@ -96,6 +96,7 @@ function LoadSetId(userId) {
 
 var entryPointHandlers = {
     'NewSession': function () {
+        console.log('enter NewSession');
         var accessToken = this.event.session.user.accessToken;
         if (!accessToken) {
             var speechOutput = this.t("LINK_ACCOUNT");
@@ -103,6 +104,7 @@ var entryPointHandlers = {
         } else {
             var token = parseToken(accessToken);
             quizlet = new QuizletAPI(token.user_id, token.access_token);
+            console.log('NewSession LoadSetId');
             LoadSetId(this.event.session.user.userId)
                 .then((data) => {
                     if ((data.Item !== undefined) && (data.Item.Data !== undefined)) {
@@ -121,9 +123,12 @@ var entryPointHandlers = {
         }
     },
     'Unhandled': function () {
+        console.log('enter Unhandled');
         this.emit(':tell', this.t("UNEXPECTED"));
     },
     'QueryLastSet': function (set_id) {
+        console.log('enter QueryLastSet');
+        console.log('QueryLastSet getSafeSet');
         quizlet.getSafeSet(set_id)
             .then((data) => {
                 if (data.http_code) {
@@ -157,6 +162,7 @@ var entryPointHandlers = {
 
 var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'MainMenu': function (prefix) {
+        console.log('enter MAINMENU.MainMenu');
         this.attributes['quizlet'] = undefined;
         var speechOutput = (prefix || "") + this.t("MAIN_MENU") + this.t("HOW_CAN_I_HELP");
         var repromptSpeech = this.t("MAIN_MENU_REPROMPT");
@@ -164,43 +170,54 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'SelectFavoriteSetIntent': function () {
+        console.log('enter MAINMENU.SelectFavoriteSetIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('QueryUserFavorites');
     },
     'SelectSetIntent': function () {
+        console.log('enter MAINMENU.SelectSetIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('QueryUserSets');
     },
     'SelectClassIntent': function () {
+        console.log('enter MAINMENU.SelectClassIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('QueryUserClasses');
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter MAINMENU.AMAZON.RepeatIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('MainMenu');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter MAINMENU.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter MAINMENU.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter MAINMENU.AMAZON.StartOverIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('MainMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter MAINMENU.AMAZON.HelpIntent');
         var speechOutput = this.t("HELP_MESSAGE_MAIN_MENU", this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, speechOutput);
     },
     'Unhandled': function () {
+        console.log('enter MAINMENU.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'QueryUserSets': function () {
+        console.log('enter MAINMENU.QueryUserSets');
+        console.log('QueryUserSets getUserSetsBasic');
         quizlet.getUserSetsBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -229,6 +246,8 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             });
     },
     'QueryUserFavorites': function () {
+        console.log('enter MAINMENU.QueryUserFavorites');
+        console.log('QueryUserFavorites getUserFavoritesBasic');
         quizlet.getUserFavoritesBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -257,6 +276,8 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             });
     },
     'QueryUserClasses': function () {
+        console.log('enter MAINMENU.QueryUserClasses');
+        console.log('QueryUserClasses getUserClassesBasic');
         quizlet.getUserClassesBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -285,7 +306,9 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             });
     },
     'QueryClassSets': function () {
+        console.log('enter MAINMENU.QueryClassSets');
         var class_id = this.attributes['quizlet'].class_id;
+        console.log('QueryClassSets getClassSetsBasic');
         quizlet.getClassSetsBasic(class_id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -314,6 +337,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
             });
     },
     'SelectOption': function (prefix) {
+        console.log('enter MAINMENU.SelectOption');
         var length = this.attributes['quizlet'].data.length;
         if (length == 1) {
             this.handler.state = states.CONFIRMNAVITEM;
@@ -327,6 +351,7 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
 
 var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
     'ConfirmNavItem': function (prefix) {
+        console.log('enter CONFIRMNAVITEM.ConfirmNavItem');
         var type = this.attributes['quizlet'].type;
         switch (type) {
             case dataType.SET:
@@ -375,6 +400,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
         }
     },
     'AMAZON.YesIntent': function () {
+        console.log('enter CONFIRMNAVITEM.AMAZON.YesIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             var class_id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
@@ -387,26 +413,32 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
         }
     },
     'AMAZON.NoIntent': function () {
+        console.log('enter CONFIRMNAVITEM.AMAZON.NoIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('MainMenu');
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter CONFIRMNAVITEM.AMAZON.RepeatIntent');
         this.handler.state = states.CONFIRMNAVITEM;
         this.emitWithState('ConfirmNavItem');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter CONFIRMNAVITEM.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter CONFIRMNAVITEM.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter CONFIRMNAVITEM.AMAZON.StartOverIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('MainMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter CONFIRMNAVITEM.AMAZON.HelpIntent');
         var type = this.attributes['quizlet'].type;
         var speechOutput;
         if (type == dataType.CLASS) {
@@ -417,6 +449,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
+        console.log('enter CONFIRMNAVITEM.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
@@ -425,6 +458,7 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
 
 var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITEMFROMLIST, {
     'SelectNavItemFromList': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.SelectNavItemFromList');
         var data = this.attributes['quizlet'].data;
         var index = this.attributes['quizlet'].index;
         var type = this.attributes['quizlet'].type;
@@ -479,6 +513,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'SetOneIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.SetOneIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -489,6 +524,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'SetTwoIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.SetTwoIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -499,6 +535,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'SetThreeIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.SetThreeIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -509,6 +546,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'SetFourIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.SetFourIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -519,6 +557,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'ClassOneIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.ClassOneIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -529,6 +568,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'ClassTwoIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.ClassTwoIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -539,6 +579,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'ClassThreeIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.ClassThreeIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -549,6 +590,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'ClassFourIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.ClassFourIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             this.handler.state = states.SELECTNAVITEMFROMLIST;
@@ -559,6 +601,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'OneIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.OneIntent');
         var type = this.attributes['quizlet'].type;
         if (type == dataType.CLASS) {
             var class_id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
@@ -571,6 +614,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'TwoIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.TwoIntent');
         var length = this.attributes['quizlet'].data.length;
         var index = this.attributes['quizlet'].index;
         if (length - index < 2) {
@@ -591,6 +635,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'ThreeIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.ThreeIntent');
         var length = this.attributes['quizlet'].data.length;
         var index = this.attributes['quizlet'].index;
         if (length - index < 3) {
@@ -611,6 +656,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'FourIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.FourIntent');
         var length = this.attributes['quizlet'].data.length;
         var index = this.attributes['quizlet'].index;
         if (length - index < 4) {
@@ -631,6 +677,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'AMAZON.NextIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.AMAZON.NextIntent');
         var length = this.attributes['quizlet'].data.length;
         var index = this.attributes['quizlet'].index;
         if (length - index > ITEMS_PER_PAGE) {
@@ -643,22 +690,27 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.AMAZON.RepeatIntent');
         this.handler.state = states.SELECTNAVITEMFROMLIST;
         this.emitWithState('SelectNavItemFromList');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.AMAZON.StartOverIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('MainMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.AMAZON.HelpIntent');
         var data = this.attributes['quizlet'].data;
         var index = this.attributes['quizlet'].index;
         var type = this.attributes['quizlet'].type;
@@ -686,6 +738,7 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         }
     },
     'Unhandled': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
@@ -694,7 +747,9 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
 
 var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
     'SelectSet': function () {
+        console.log('enter SETMENU.SelectSet');
         var id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
+        console.log('SelectSet getSafeSet');
         quizlet.getSafeSet(id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -707,6 +762,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].set = data;
                     var id = this.attributes['quizlet'].set.id;
+                    console.log('SelectSet StoreSetId');
                     StoreSetId(this.event.session.user.userId, id)
                         .then((data) => {
                             this.handler.state = states.SETMENU;
@@ -724,7 +780,9 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             });
     },
     'CheckIsFavorite': function () {
+        console.log('enter SETMENU.CheckIsFavorite');
         var id = this.attributes['quizlet'].set.id;
+        console.log('CheckIsFavorite getUserFavoritesBasic');
         quizlet.getUserFavoritesBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -748,6 +806,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             });
     },
     'ReturnSetInfo': function () {
+        console.log('enter SETMENU.ReturnSetInfo');
         var set = this.attributes['quizlet'].set;
         var title = set.title;
         title = sanitize(title);
@@ -756,6 +815,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         this.emitWithState('SetMenu', speechOutput);
     },
     'SetMenu': function (prefix) {
+        console.log('enter SETMENU.SetMenu');
         var set = this.attributes['quizlet'].set;
         var favoriteState;
         if (this.attributes['quizlet'].favorite == true) {
@@ -769,14 +829,17 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ReviewIntent': function () {
+        console.log('enter SETMENU.ReviewIntent');
         this.handler.state = states.REVIEWMENU;
         this.emitWithState('ReviewMenu');
     },
     'QuizMeIntent': function () {
+        console.log('enter SETMENU.QuizMeIntent');
         this.handler.state = states.QUIZMENU;
         this.emitWithState('QuizMenu');
     },
     'AddFavoriteIntent': function () {
+        console.log('enter SETMENU.AddFavoriteIntent');
         if (this.attributes['quizlet'].favorite == false) {
             this.handler.state = states.SETMENU;
             this.emitWithState('AddSetFavorite');
@@ -786,6 +849,7 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         }
     },
     'RemoveFavoriteIntent': function () {
+        console.log('enter SETMENU.RemoveFavoriteIntent');
         if (this.attributes['quizlet'].favorite == true) {
             this.handler.state = states.SETMENU;
             this.emitWithState('RemoveSetFavorite');
@@ -795,22 +859,27 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         }
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter SETMENU.AMAZON.RepeatIntent');
         this.handler.state = states.SETMENU;
         this.emitWithState('SetMenu');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter SETMENU.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter SETMENU.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter SETMENU.AMAZON.StartOverIntent');
         this.handler.state = states.MAINMENU;
         this.emitWithState('MainMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter SETMENU.AMAZON.HelpIntent');
         var favoriteState;
         if (this.attributes['quizlet'].favorite == true) {
             favoriteState = this.t("REMOVE_FAVORITE");
@@ -821,12 +890,15 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
+        console.log('enter SETMENU.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'RemoveSetFavorite': function (set_id) {
+        console.log('enter SETMENU.RemoveSetFavorite');
         var set_id = this.attributes['quizlet'].set.id;
+        console.log('RemoveSetFavorite unmarkUserSetFavorite');
         quizlet.unmarkUserSetFavorite(set_id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -845,7 +917,9 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
             });
     },
     'AddSetFavorite': function (set_id) {
+        console.log('enter SETMENU.AddSetFavorite');
         var set_id = this.attributes['quizlet'].set.id;
+        console.log('AddSetFavorite markUserSetFavorite');
         quizlet.markUserSetFavorite(set_id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -867,50 +941,61 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
 
 var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
     'ReviewMenu': function () {
+        console.log('enter REVIEWMENU.ReviewMenu');
         var speechOutput = this.t("REVIEW_MENU");
         var repromptSpeech = this.t("REVIEW_MENU_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ReviewByTermIntent': function () {
+        console.log('enter REVIEWMENU.ReviewByTermIntent');
         this.handler.state = states.REVIEWMENU;
         this.emitWithState('ByTermIntent');
     },
     'ReviewByDefinitionIntent': function () {
+        console.log('enter REVIEWMENU.ReviewByDefinitionIntent');
         this.handler.state = states.REVIEWMENU;
         this.emitWithState('ByDefinitionIntent');
     },
     'ByTermIntent': function () {
+        console.log('enter REVIEWMENU.ByTermIntent');
         this.attributes['quizlet'].reviewByTerm = true;
         this.handler.state = states.REVIEWING;
         this.emitWithState('ReviewSet');
     },
     'ByDefinitionIntent': function () {
+        console.log('enter REVIEWMENU.ByDefinitionIntent');
         this.attributes['quizlet'].reviewByTerm = false;
         this.handler.state = states.REVIEWING;
         this.emitWithState('ReviewSet');
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter REVIEWMENU.AMAZON.RepeatIntent');
         this.handler.state = states.REVIEWMENU;
         this.emitWithState('ReviewMenu');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter REVIEWMENU.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter REVIEWMENU.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter REVIEWMENU.AMAZON.StartOverIntent');
         this.handler.state = states.SETMENU;
         this.emitWithState('SetMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter REVIEWMENU.AMAZON.HelpIntent');
         var speechOutput = this.t("HELP_MESSAGE_REVIEW_MENU", this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
+        console.log('enter REVIEWMENU.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
@@ -919,6 +1004,7 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
 
 var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
     'ReviewSet': function () {
+        console.log('enter REVIEWING.ReviewSet');
         this.attributes['quizlet'].index = 0;
         var speechOutput;
         if (this.attributes['quizlet'].reviewByTerm == true) {
@@ -930,6 +1016,7 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         this.emitWithState('Reviewing', speechOutput);
     },
     'Reviewing': function (prefix) {
+        console.log('enter REVIEWING.Reviewing');
         var set = this.attributes['quizlet'].set;
         var index = this.attributes['quizlet'].index;
         var speechOutput = (prefix || "");
@@ -957,27 +1044,33 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         }
     },
     'AMAZON.NextIntent': function () {
+        console.log('enter REVIEWING.AMAZON.NextIntent');
         this.attributes['quizlet'].index += 1;
         this.handler.state = states.REVIEWING;
         this.emitWithState('Reviewing');
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter REVIEWING.AMAZON.RepeatIntent');
         this.handler.state = states.REVIEWING;
         this.emitWithState('Reviewing');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter REVIEWING.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter REVIEWING.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter REVIEWING.AMAZON.StartOverIntent');
         this.handler.state = states.SETMENU;
         this.emitWithState('SetMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter REVIEWING.AMAZON.HelpIntent');
         var speechOutput;
         if (this.attributes['quizlet'].reviewByTerm == true) {
             speechOutput = this.t("HELP_MESSAGE_REVIEWING_BY_TERM", this.t("HOW_CAN_I_HELP"));
@@ -987,6 +1080,7 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
+        console.log('enter REVIEWING.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
@@ -995,16 +1089,19 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
 
 var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
     'QuizMenu': function () {
+        console.log('enter QUIZMENU.QuizMenu');
         var speechOutput = this.t("QUIZ_MENU");
         var repromptSpeech = this.t("QUIZ_MENU_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'ByDefinitionIntent': function () {
+        console.log('enter QUIZMENU.ByDefinitionIntent');
         this.handler.state = states.QUIZMENU;
         this.emitWithState('DefinitionsQuizIntent');
     },
     'DefinitionsQuizIntent': function () {
+        console.log('enter QUIZMENU.DefinitionsQuizIntent');
         var set = this.attributes['quizlet'].set;
         this.attributes['quizlet'].quiz_terms = shuffle.pick(set.terms, { 'picks': Math.min(ITEMS_PER_QUIZ, set.terms.length) });
         this.attributes['quizlet'].correct = 0;
@@ -1015,10 +1112,12 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'ByTermIntent': function () {
+        console.log('enter QUIZMENU.ByTermIntent');
         this.handler.state = states.QUIZMENU;
         this.emitWithState('TermsQuizIntent');
     },
     'TermsQuizIntent': function () {
+        console.log('enter QUIZMENU.TermsQuizIntent');
         var set = this.attributes['quizlet'].set;
         this.attributes['quizlet'].quiz_terms = shuffle.pick(set.terms, { 'picks': Math.min(ITEMS_PER_QUIZ, set.terms.length) });
         this.attributes['quizlet'].correct = 0;
@@ -1029,26 +1128,32 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter QUIZMENU.AMAZON.RepeatIntent');
         this.handler.state = states.QUIZMENU;
         this.emitWithState('QuizMenu');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter QUIZMENU.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter QUIZMENU.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter QUIZMENU.AMAZON.StartOverIntent');
         this.handler.state = states.SETMENU;
         this.emitWithState('SetMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter QUIZMENU.AMAZON.HelpIntent');
         var speechOutput = this.t("HELP_MESSAGE_QUIZ_MENU", this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
+        console.log('enter QUIZMENU.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
@@ -1057,6 +1162,7 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
 
 var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
     'GenerateQuestion': function (prefix) {
+        console.log('enter TERMSQUIZ.GenerateQuestion');
         if (this.attributes['quizlet'].index == this.attributes['quizlet'].quiz_terms.length) {
             var correct = this.attributes['quizlet'].correct;
             var questions = this.attributes['quizlet'].quiz_terms.length;
@@ -1091,6 +1197,7 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
         }
     },
     'AskQuestion': function (prefix) {
+        console.log('enter TERMSQUIZ.AskQuestion');
         var term = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].term;
         var definition = this.attributes['quizlet'].set.terms[this.attributes['quizlet'].choice_index].definition;
         term = sanitize(term);
@@ -1101,6 +1208,7 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'AMAZON.YesIntent': function () {
+        console.log('enter TERMSQUIZ.AMAZON.YesIntent');
         var speechOutput;
         if (this.attributes['quizlet'].correct_answer == true) {
             var speechOutput = this.t("CORRECT");
@@ -1113,6 +1221,7 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'AMAZON.NoIntent': function () {
+        console.log('enter TERMSQUIZ.AMAZON.NoIntent');
         var speechOutput;
         if (this.attributes['quizlet'].correct_answer == false) {
             var speechOutput = this.t("CORRECT");
@@ -1125,26 +1234,32 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter TERMSQUIZ.AMAZON.RepeatIntent');
         this.handler.state = states.TERMSQUIZ;
         this.emitWithState('AskQuestion');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter TERMSQUIZ.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter TERMSQUIZ.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter TERMSQUIZ.AMAZON.StartOverIntent');
         this.handler.state = states.SETMENU;
         this.emitWithState('SetMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter TERMSQUIZ.AMAZON.HelpIntent');
         var speechOutput = this.t("HELP_TERMS_QUIZ_MENU", this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
+        console.log('enter TERMSQUIZ.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
@@ -1153,6 +1268,7 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
 
 var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
     'GenerateQuestion': function (prefix) {
+        console.log('enter DEFINITIONSQUIZ.GenerateQuestion');
         if (this.attributes['quizlet'].index == this.attributes['quizlet'].quiz_terms.length) {
             var correct = this.attributes['quizlet'].correct;
             var questions = this.attributes['quizlet'].quiz_terms.length;
@@ -1194,6 +1310,7 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
         }
     },
     'AskQuestion': function (prefix) {
+        console.log('enter DEFINITIONSQUIZ.AskQuestion');
         var choice_index = this.attributes['quizlet'].choice_index;
         var definition = this.attributes['quizlet'].quiz_terms[this.attributes['quizlet'].index].definition;
         definition = sanitize(definition);
@@ -1211,18 +1328,22 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
         this.emit(':ask', speechOutput, repromptSpeech);
     },
     'TermOneIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.TermOneIntent');
         this.handler.state = states.DEFINITIONSQUIZ;
         this.emitWithState('OneIntent');
     },
     'TermTwoIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.TermTwoIntent');
         this.handler.state = states.DEFINITIONSQUIZ;
         this.emitWithState('TwoIntent');
     },
     'TermThreeIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.TermThreeIntent');
         this.handler.state = states.DEFINITIONSQUIZ;
         this.emitWithState('ThreeIntent');
     },
     'OneIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.OneIntent');
         var speechOutput;
         if (this.attributes['quizlet'].correct_answer == 0) {
             var speechOutput = this.t("CORRECT");
@@ -1235,6 +1356,7 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'TwoIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.TwoIntent');
         var speechOutput;
         if (this.attributes['quizlet'].correct_answer == 1) {
             var speechOutput = this.t("CORRECT");
@@ -1247,6 +1369,7 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
         this.emitWithState('GenerateQuestion', speechOutput);
     },
     'ThreeIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.ThreeIntent');
         var length = this.attributes['quizlet'].choice_index.length;
         if (length < 3) {
             this.handler.state = states.DEFINITIONSQUIZ;
@@ -1265,26 +1388,32 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
         }
     },
     'AMAZON.RepeatIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.AMAZON.RepeatIntent');
         this.handler.state = states.DEFINITIONSQUIZ;
         this.emitWithState('AskQuestion');
     },
     'AMAZON.CancelIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.AMAZON.CancelIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StopIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.AMAZON.StopIntent');
         var speechOutput = this.t("STOP_MESSAGE");
         this.emit(':tell', speechOutput);
     },
     'AMAZON.StartOverIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.AMAZON.StartOverIntent');
         this.handler.state = states.SETMENU;
         this.emitWithState('SetMenu');
     },
     'AMAZON.HelpIntent': function () {
+        console.log('enter DEFINITIONSQUIZ.AMAZON.HelpIntent');
         var speechOutput = this.t("HELP_DEFINITIONS_QUIZ_MENU", this.t("HOW_CAN_I_HELP"));
         this.emit(':ask', speechOutput, this.t("HELP_ME"));
     },
     'Unhandled': function () {
+        console.log('enter DEFINITIONSQUIZ.Unhandled');
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
