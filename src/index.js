@@ -126,6 +126,9 @@ var entryPointHandlers = {
         console.log('enter Unhandled');
         this.emit(':tell', this.t("UNEXPECTED"));
     },
+    'SessionEndedRequest': function () {
+        console.log('enter SessionEndedRequest');
+    },
     'QueryLastSet': function (set_id) {
         console.log('enter QueryLastSet');
         console.log('QueryLastSet getSafeSet');
@@ -214,6 +217,9 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
+    },
+    'SessionEndedRequest': function () {
+        console.log('enter MAINMENU.SessionEndedRequest');
     },
     'QueryUserSets': function () {
         console.log('enter MAINMENU.QueryUserSets');
@@ -453,6 +459,9 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
+    },
+    'SessionEndedRequest': function () {
+        console.log('enter CONFIRMNAVITEM.SessionEndedRequest');
     }
 });
 
@@ -742,6 +751,9 @@ var selectNavItemFromListHandlers = Alexa.CreateStateHandler(states.SELECTNAVITE
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
+    },
+    'SessionEndedRequest': function () {
+        console.log('enter SELECTNAVITEMFROMLIST.SessionEndedRequest');
     }
 });
 
@@ -895,6 +907,9 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
+    'SessionEndedRequest': function () {
+        console.log('enter SETMENU.SessionEndedRequest');
+    },
     'RemoveSetFavorite': function (set_id) {
         console.log('enter SETMENU.RemoveSetFavorite');
         var set_id = this.attributes['quizlet'].set.id;
@@ -1000,6 +1015,9 @@ var reviewMenuHandlers = Alexa.CreateStateHandler(states.REVIEWMENU, {
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
+    'SessionEndedRequest': function () {
+        console.log('enter REVIEWMENU.SessionEndedRequest');
+    }
 });
 
 var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
@@ -1085,6 +1103,9 @@ var reviewingHandlers = Alexa.CreateStateHandler(states.REVIEWING, {
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
+    'SessionEndedRequest': function () {
+        console.log('enter REVIEWING.SessionEndedRequest');
+    }
 });
 
 var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
@@ -1158,6 +1179,9 @@ var quizMenuHandlers = Alexa.CreateStateHandler(states.QUIZMENU, {
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
     },
+    'SessionEndedRequest': function () {
+        console.log('enter QUIZMENU.SessionEndedRequest');
+    }
 });
 
 var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
@@ -1263,6 +1287,9 @@ var termsQuizHandlers = Alexa.CreateStateHandler(states.TERMSQUIZ, {
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
+    },
+    'SessionEndedRequest': function () {
+        console.log('enter TERMSQUIZ.SessionEndedRequest');
     }
 });
 
@@ -1417,6 +1444,9 @@ var definitionsQuizHandlers = Alexa.CreateStateHandler(states.DEFINITIONSQUIZ, {
         var speechOutput = this.t("NO_UNDERSTAND") + this.attributes["reprompt"];;
         var repromptSpeech = this.t("HELP_ME");
         this.emit(':ask', speechOutput, repromptSpeech);
+    },
+    'SessionEndedRequest': function () {
+        console.log('enter DEFINITIONSQUIZ.SessionEndedRequest');
     }
 });
 
