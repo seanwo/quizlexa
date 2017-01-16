@@ -54,16 +54,27 @@ const GOOD_PERCENTAGE = 0.70;
 const MAX_SETS = 40;
 const MAX_CLASSES = 100;
 const MAX_TERMS_PER_SET = 100;
+const LEAVE_REVIEW_COUNT = 50;
+const LEAVE_REVIEW_INITIAL_PROMPT = 15;
 
-function StoreSetId(userId, id) {
+const LeaveReviewCardTitle = 'Like Quizlexa?';
+const LeaveReviewCardContents = 'If you have enjoyed using this skill, please leave us a review or rating on Amazon!';
+
+function StoreSessionData(userId, invocations, id) {
     return new Promise(
         function (resolve, reject) {
+            var item = {};
+            item.CustomerId = { S: userId };
+            item.Invocations = { S: invocations.toString() };
+            item.Timestamp = { S: Date.now().toString() };
+            item.LastUsed = { S: new Date().toUTCString() };
+            if ((id !== undefined) && (id !== null)) {
+                item.Data = { S: id.toString() };
+            }
             dynamodb.putItem({
-                TableName: 'QuizlexaUserData',
-                Item: {
-                    CustomerId: { S: userId },
-                    Data: { S: id.toString() }
-                }
+                // TableName: 'QuizlexaUserData',
+                TableName: 'DevelopmentUserData',
+                Item: item
             }, function (err, data) {
                 if (err) {
                     reject(err);
@@ -75,11 +86,12 @@ function StoreSetId(userId, id) {
     )
 };
 
-function LoadSetId(userId) {
+function LoadSessionData(userId) {
     return new Promise(
         function (resolve, reject) {
             dynamodb.getItem({
-                TableName: 'QuizlexaUserData',
+                // TableName: 'QuizlexaUserData',
+                TableName: 'DevelopmentUserData',
                 Key: {
                     CustomerId: { S: userId }
                 }
@@ -97,6 +109,9 @@ function LoadSetId(userId) {
 var entryPointHandlers = {
     'NewSession': function () {
         console.log('enter NewSession');
+        this.attributes['quizlexa'] = {};
+        this.attributes['quizlexa'].invocations = 0;
+        this.attributes['quizlexa'].leaveReview = false;
         var accessToken = this.event.session.user.accessToken;
         if (!accessToken) {
             var speechOutput = this.t("LINK_ACCOUNT");
@@ -104,20 +119,41 @@ var entryPointHandlers = {
         } else {
             var token = parseToken(accessToken);
             quizlet = new QuizletAPI(token.user_id, token.access_token);
-            console.log('NewSession LoadSetId');
-            LoadSetId(this.event.session.user.userId)
+            console.log('NewSession LoadSessionData');
+            LoadSessionData(this.event.session.user.userId)
                 .then((data) => {
-                    if ((data.Item !== undefined) && (data.Item.Data !== undefined)) {
-                        this.handler.state = '';
-                        this.emitWithState('QueryLastSet', data.Item.Data.S);
-                    } else {
-                        var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
-                        this.handler.state = states.MAINMENU;
-                        this.emitWithState('MainMenu', speechOutput);
+                    var setId = null;
+                    if (data.Item !== undefined) {
+                        if (data.Item.Data !== undefined) {
+                            setId = data.Item.Data.S;
+                        }
+                        if (data.Item.Invocations !== undefined) {
+                            this.attributes['quizlexa'].invocations = parseInt(data.Item.Invocations.S);
+                        }
                     }
+                    this.attributes['quizlexa'].invocations += 1;
+                    if ((this.attributes['quizlexa'].invocations == LEAVE_REVIEW_INITIAL_PROMPT) || ((this.attributes['quizlexa'].invocations % LEAVE_REVIEW_COUNT) == 0)) {
+                        this.attributes['quizlexa'].leaveReview = true;
+                    }
+                    console.log('NewSession StoreSessionData');
+                    StoreSessionData(this.event.session.user.userId, this.attributes['quizlexa'].invocations, setId)
+                        .then((data) => {
+                            if (setId == null) {
+                                var speechOutput = this.t("WELCOME_MESSAGE", this.t("SKILL_NAME"));
+                                this.handler.state = states.MAINMENU;
+                                this.emitWithState('MainMenu', speechOutput);
+                            } else {
+                                this.handler.state = '';
+                                this.emitWithState('QueryLastSet', setId);
+                            }
+                        })
+                        .catch((err) => {
+                            console.error('error storing session data: ' + err);
+                            this.emit(':tell', this.t("UNEXPECTED"));
+                        });
                 })
                 .catch((err) => {
-                    console.error('error retrieving previous set: ' + err);
+                    console.error('error loading session data: ' + err);
                     this.emit(':tell', this.t("UNEXPECTED"));
                 });
         }
@@ -167,10 +203,18 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'MainMenu': function (prefix) {
         console.log('enter MAINMENU.MainMenu');
         this.attributes['quizlet'] = undefined;
+        if (this.attributes['quizlexa'].leaveReview == true) {
+            prefix = (prefix || "") + this.t("LEAVE_REVIEW");
+        }
         var speechOutput = (prefix || "") + this.t("MAIN_MENU") + this.t("HOW_CAN_I_HELP");
         var repromptSpeech = this.t("MAIN_MENU_REPROMPT");
         this.attributes["reprompt"] = repromptSpeech;
-        this.emit(':ask', speechOutput, repromptSpeech);
+        if (this.attributes['quizlexa'].leaveReview == true) {
+            this.attributes['quizlexa'].leaveReview = false;
+            this.emit(':askWithCard', speechOutput, repromptSpeech, LeaveReviewCardTitle, LeaveReviewCardContents);
+        } else {
+            this.emit(':ask', speechOutput, repromptSpeech);
+        }
     },
     'SelectFavoriteSetIntent': function () {
         console.log('enter MAINMENU.SelectFavoriteSetIntent');
@@ -371,10 +415,18 @@ var confirmNavItemHandlers = Alexa.CreateStateHandler(states.CONFIRMNAVITEM, {
             case dataType.LAST_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
                 title = sanitize(title);
+                if (this.attributes['quizlexa'].leaveReview == true) {
+                    prefix = (prefix || "") + this.t("LEAVE_REVIEW");
+                }
                 var speechOutput = (prefix || "") + this.t("LAST_SET", title) + this.t("USE_SET");
                 var repromptSpeech = this.t("USE_SET_REPROMPT");
                 this.attributes["reprompt"] = repromptSpeech;
-                this.emit(':ask', speechOutput, repromptSpeech);
+                if (this.attributes['quizlexa'].leaveReview == true) {
+                    this.attributes['quizlexa'].leaveReview = false;
+                    this.emit(':askWithCard', speechOutput, repromptSpeech, LeaveReviewCardTitle, LeaveReviewCardContents);
+                } else {
+                    this.emit(':ask', speechOutput, repromptSpeech);
+                }
                 break;
             case dataType.FAVORITE_SET:
                 var title = this.attributes['quizlet'].data[this.attributes['quizlet'].index].title;
@@ -774,14 +826,14 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
                     this.attributes['quizlet'] = {};
                     this.attributes['quizlet'].set = data;
                     var id = this.attributes['quizlet'].set.id;
-                    console.log('SelectSet StoreSetId');
-                    StoreSetId(this.event.session.user.userId, id)
+                    console.log('SelectSet StoreSessionData');
+                    StoreSessionData(this.event.session.user.userId, this.attributes['quizlexa'].invocations, id)
                         .then((data) => {
                             this.handler.state = states.SETMENU;
                             this.emitWithState('CheckIsFavorite');
                         })
                         .catch((err) => {
-                            console.error('error storing previous set: ' + err);
+                            console.error('error storing session data: ' + err);
                             this.emit(':tell', this.t("UNEXPECTED"));
                         });
                 }
@@ -1544,6 +1596,7 @@ const languageStrings = {
             "NUMBER_OF_QUESTIONS_CORRECT_SINGULAR": "You got %s question out of %s correct. ",
             "GREAT_WORK": "Great work! ",
             "GOOD_JOB": "Good job. ",
+            "LEAVE_REVIEW": "If you have enjoyed using this skill, please leave us a review or rating on Amazon! ",
             "UNEXPECTED": "An unexpected error has occurred. Please try again later! ",
             "QUIZLETERROR": "There was an error communicating with Quizlet. Please try again later! ",
             "NOTIMPL": "This code path is not yet implemented. "
@@ -1627,6 +1680,7 @@ const languageStrings = {
             "NUMBER_OF_QUESTIONS_CORRECT_SINGULAR": "You got %s question out of %s correct. ",
             "GREAT_WORK": "Great work! ",
             "GOOD_JOB": "Good job. ",
+            "LEAVE_REVIEW": "If you have enjoyed using this skill, please leave us a review or rating on Amazon! ",
             "UNEXPECTED": "An unexpected error has occurred. Please try again later! ",
             "QUIZLETERROR": "There was an error communicating with Quizlet. Please try again later! ",
             "NOTIMPL": "This code path is not yet implemented. "
