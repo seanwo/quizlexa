@@ -56,6 +56,7 @@ const MAX_CLASSES = 100;
 const MAX_TERMS_PER_SET = 100;
 const LEAVE_REVIEW_COUNT = 50;
 const LEAVE_REVIEW_INITIAL_PROMPT = 15;
+const LEAVE_REVIEW_COUNT_MAX = 200;
 
 const LeaveReviewCardTitle = 'Like Quizlexa?';
 const LeaveReviewCardContents = 'If you have enjoyed using this skill, please leave us a review or rating on Amazon!';
@@ -130,7 +131,8 @@ var entryPointHandlers = {
                         }
                     }
                     this.attributes['quizlexa'].invocations += 1;
-                    if ((this.attributes['quizlexa'].invocations == LEAVE_REVIEW_INITIAL_PROMPT) || ((this.attributes['quizlexa'].invocations % LEAVE_REVIEW_COUNT) == 0)) {
+                    if ((this.attributes['quizlexa'].invocations == LEAVE_REVIEW_INITIAL_PROMPT) ||
+                        ((this.attributes['quizlexa'].invocations <= LEAVE_REVIEW_COUNT_MAX) && ((this.attributes['quizlexa'].invocations % LEAVE_REVIEW_COUNT) == 0))) {
                         this.attributes['quizlexa'].leaveReview = true;
                     }
                     console.log('NewSession StoreSessionData');
