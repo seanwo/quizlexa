@@ -72,8 +72,7 @@ function StoreSessionData(userId, invocations, id) {
                 item.Data = { S: id.toString() };
             }
             dynamodb.putItem({
-                // TableName: 'QuizlexaUserData',
-                TableName: 'DevelopmentUserData',
+                TableName: 'QuizlexaUserData',
                 Item: item
             }, function (err, data) {
                 if (err) {
@@ -90,8 +89,7 @@ function LoadSessionData(userId) {
     return new Promise(
         function (resolve, reject) {
             dynamodb.getItem({
-                // TableName: 'QuizlexaUserData',
-                TableName: 'DevelopmentUserData',
+                TableName: 'QuizlexaUserData',
                 Key: {
                     CustomerId: { S: userId }
                 }
