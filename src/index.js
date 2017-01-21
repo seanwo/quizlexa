@@ -9,7 +9,6 @@ var dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10' })
 const shuffle = require('shuffle-array');
 
 const QuizletAPI = require('quizlet-api').QuizletAPI;
-var quizlet;
 
 exports.handler = function (event, context, callback) {
     var alexa = Alexa.handler(event, context);
@@ -116,8 +115,6 @@ var entryPointHandlers = {
             var speechOutput = this.t("LINK_ACCOUNT");
             this.emit(':tellWithLinkAccountCard', speechOutput);
         } else {
-            var token = parseToken(accessToken);
-            quizlet = new QuizletAPI(token.user_id, token.access_token);
             console.log('NewSession LoadSessionData');
             LoadSessionData(this.event.session.user.userId)
                 .then((data) => {
@@ -168,6 +165,8 @@ var entryPointHandlers = {
     'QueryLastSet': function (set_id) {
         console.log('enter QueryLastSet');
         console.log('QueryLastSet getSafeSet');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.getSafeSet(set_id)
             .then((data) => {
                 if (data.http_code) {
@@ -268,6 +267,8 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'QueryUserSets': function () {
         console.log('enter MAINMENU.QueryUserSets');
         console.log('QueryUserSets getUserSetsBasic');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.getUserSetsBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -298,6 +299,8 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'QueryUserFavorites': function () {
         console.log('enter MAINMENU.QueryUserFavorites');
         console.log('QueryUserFavorites getUserFavoritesBasic');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.getUserFavoritesBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -328,6 +331,8 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
     'QueryUserClasses': function () {
         console.log('enter MAINMENU.QueryUserClasses');
         console.log('QueryUserClasses getUserClassesBasic');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.getUserClassesBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -359,6 +364,8 @@ var mainMenuHandlers = Alexa.CreateStateHandler(states.MAINMENU, {
         console.log('enter MAINMENU.QueryClassSets');
         var class_id = this.attributes['quizlet'].class_id;
         console.log('QueryClassSets getClassSetsBasic');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.getClassSetsBasic(class_id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -814,6 +821,8 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         console.log('enter SETMENU.SelectSet');
         var id = this.attributes['quizlet'].data[this.attributes['quizlet'].index].id;
         console.log('SelectSet getSafeSet');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.getSafeSet(id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -847,6 +856,8 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         console.log('enter SETMENU.CheckIsFavorite');
         var id = this.attributes['quizlet'].set.id;
         console.log('CheckIsFavorite getUserFavoritesBasic');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.getUserFavoritesBasic()
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -966,6 +977,8 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         console.log('enter SETMENU.RemoveSetFavorite');
         var set_id = this.attributes['quizlet'].set.id;
         console.log('RemoveSetFavorite unmarkUserSetFavorite');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.unmarkUserSetFavorite(set_id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
@@ -987,6 +1000,8 @@ var setMenuHandlers = Alexa.CreateStateHandler(states.SETMENU, {
         console.log('enter SETMENU.AddSetFavorite');
         var set_id = this.attributes['quizlet'].set.id;
         console.log('AddSetFavorite markUserSetFavorite');
+        var token = parseToken(this.event.session.user.accessToken);
+        var quizlet = new QuizletAPI(token.user_id, token.access_token);
         quizlet.markUserSetFavorite(set_id)
             .then((data) => {
                 if ((data.http_code) && (data.http_code == 401) && (data.error == 'invalid_grant')) {
