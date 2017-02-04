@@ -1535,7 +1535,7 @@ function parseToken(access_token) {
 const languageStrings = {
     "en-US": {
         "translation": {
-            "SKILL_NAME": "Quizlexa",
+            "SKILL_NAME": "Quiz<break time=\"5ms\"/>lexa",
             "WELCOME_MESSAGE": "Welcome to %s. ",
             "HOW_CAN_I_HELP": "How can I help you? ",
             "HELP_ME": "For instructions on what you can say, please say help me. ",
@@ -1619,7 +1619,7 @@ const languageStrings = {
     },
     "en-GB": {
         "translation": {
-            "SKILL_NAME": "Quizlexa",
+            "SKILL_NAME": "Quiz<break time=\"5ms\"/>lexa",
             "WELCOME_MESSAGE": "Welcome to %s. ",
             "HOW_CAN_I_HELP": "How can I help you? ",
             "HELP_ME": "For instructions on what you can say, please say help me. ",
