@@ -73,6 +73,7 @@ function StoreSessionData(userId, invocations, id) {
             }
             dynamodb.putItem({
                 TableName: 'QuizlexaUserData',
+                // TableName: 'DevelopmentUserData',
                 Item: item
             }, function (err, data) {
                 if (err) {
@@ -90,6 +91,7 @@ function LoadSessionData(userId) {
         function (resolve, reject) {
             dynamodb.getItem({
                 TableName: 'QuizlexaUserData',
+                // TableName: 'DevelopmentUserData',
                 Key: {
                     CustomerId: { S: userId }
                 }
@@ -1535,7 +1537,7 @@ function parseToken(access_token) {
 const languageStrings = {
     "en-US": {
         "translation": {
-            "SKILL_NAME": "Quiz<break time=\"5ms\"/>lexa",
+            "SKILL_NAME": "Study buddy",
             "WELCOME_MESSAGE": "Welcome to %s. ",
             "HOW_CAN_I_HELP": "How can I help you? ",
             "HELP_ME": "For instructions on what you can say, please say help me. ",
@@ -1619,7 +1621,7 @@ const languageStrings = {
     },
     "en-GB": {
         "translation": {
-            "SKILL_NAME": "Quiz<break time=\"5ms\"/>lexa",
+            "SKILL_NAME": "Study buddy",
             "WELCOME_MESSAGE": "Welcome to %s. ",
             "HOW_CAN_I_HELP": "How can I help you? ",
             "HELP_ME": "For instructions on what you can say, please say help me. ",
